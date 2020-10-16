@@ -21,7 +21,7 @@ export default class LoginPage extends Component {
           <FormButton title={"Se Connecter"} />
           <TextButton
             title={"Nouvel utilisateur ? Créer votre compte"}
-            onPress={() => this.props.navigation.push("SignIn")}
+            onPress={() => this.props.navigation.push("Inscription")}
           />
         </Form>
       </View>

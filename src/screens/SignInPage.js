@@ -35,7 +35,7 @@ export default class LoginPage extends Component {
           <FormButton title={"Valider"} />
           <TextButton
             title={"Retourner a l'inscription"}
-            onPress={() => this.props.navigation.push("Login")}
+            onPress={() => this.props.navigation.push("Connexion")}
           />
         </Form>
       </View>

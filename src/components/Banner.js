@@ -9,11 +9,14 @@ export function Banner(...props) {
       {...props}
       style={styles.image}
       source={require("../../assets/images/SnapRallyImage.jpg")}
+      alt={"Image Banniere"}
     ></Image>
   );
 }
 const styles = StyleSheet.create({
   image: {
     width: windowWidth,
+    position: "relative",
+    maxWidth: 450,
   },
 });

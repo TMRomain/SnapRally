@@ -19,8 +19,8 @@ export function AuthStackNavigator() {
         animationEnabled: false,
       }}
     >
-      <AuthStack.Screen name="Login" component={LogIn} />
-      <AuthStack.Screen name="SignIn" component={SignIn} />
+      <AuthStack.Screen name="Connexion" component={LogIn} />
+      <AuthStack.Screen name="Inscription" component={SignIn} />
     </AuthStack.Navigator>
   );
 }
