@@ -14,6 +14,5 @@ const styles = StyleSheet.create({
     position: "relative",
     alignItems: "center",
     flexDirection: "column",
-    justifyContent: "space-evenly",
   },
 });

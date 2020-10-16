@@ -13,5 +13,7 @@ const styles = StyleSheet.create({
     color: "#121212",
     fontSize: 24,
     opacity: 0.47,
+    paddingTop: 50,
+    paddingVertical: 20,
   },
 });

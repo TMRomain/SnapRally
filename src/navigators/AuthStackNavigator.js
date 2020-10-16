@@ -16,6 +16,7 @@ export function AuthStackNavigator() {
     <AuthStack.Navigator
       screenOptions={{
         headerShown: false,
+        animationEnabled: false,
       }}
     >
       <AuthStack.Screen name="Login" component={LogIn} />
