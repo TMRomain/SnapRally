@@ -48,6 +48,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   input: {
-    margin: 10,
+    margin: 5,
   },
 });

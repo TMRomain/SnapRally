@@ -13,11 +13,17 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
+    "android": {
+      "package": "com.snaprally",
+      "versionCode": 1
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "package": "com.snaprally",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snaprally"
     },
     "web": {
       "favicon": "./assets/favicon.png"

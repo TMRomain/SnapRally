@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "375169771259",
+    "firebase_url": "https://snaprally-b1071.firebaseio.com",
+    "project_id": "snaprally-b1071",
+    "storage_bucket": "snaprally-b1071.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375169771259:android:b21f7cfd91db54d8c3f25e",
+        "android_client_info": {
+          "package_name": "com.snaprally"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375169771259-04k3sd9gufmdjve5celdb4676citiifc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3MI9V51H2kPw4hCotXdSpXvIosmwvujs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375169771259-04k3sd9gufmdjve5celdb4676citiifc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
