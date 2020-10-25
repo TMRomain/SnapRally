@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import React, { Component } from "react";
 import { Banner } from "../components/Banner";
 import { Heading } from "../components/Heading";
@@ -16,41 +16,82 @@ export default class LoginPage extends Component {
     this.state = {
       email: "",
       password: "",
+      confirmedPassword: "",
+      username: "",
+      error: "",
     };
   }
 
   createUser = async () => {
     let email = this.state.email;
     let password = this.state.password;
+    let username = this.state.username;
+    let confirmedPassword = this.state.confirmedPassword;
+    var user = null;
+    console.log();
+    //TODO Faire une verification de l'username
 
-    //TODO Faire une verification du mot de passe
-
-    if (email != null && password != null) {
+    //Verification des champ pour savoir si il sont vide
+    if (
+      email != null &&
+      email != undefined &&
+      email != "" &&
+      password != null &&
+      password != undefined &&
+      password != ""
+    ) {
+      //Verifier si les mot de passe coressponde
+      if (password != undefined && password != confirmedPassword) {
+        this.Error("Les Mot de Passe ne corresponde pas");
+        return;
+      }
+      if (username == undefined) {
+        this.Error("Pseudo incomplet");
+        return;
+      }
       auth()
         .createUserWithEmailAndPassword(email, password)
         .then(() => {
-          console.log("User account created & signed in!");
+          //Faire Apres le l'inscription
+          console.log("Creation du compte reussi");
+          user = auth().currentUser;
+          user
+            .updateProfile({
+              displayName: username,
+            })
+            .then(() => {
+              user.sendEmailVerification();
+            });
         })
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {
-            console.log("That email address is already in use!");
+            this.Error("Cette email deja utiliser");
           }
 
           if (error.code === "auth/invalid-email") {
-            console.log("That email address is invalid!");
+            this.Error("Cette email est invalide");
           }
 
           console.error(error);
         });
+    } else {
+      this.Error("Email ou Mot de passe Incomplet");
     }
   };
+  Error = (a_error) => {
+    this.setState({
+      error: a_error,
+    });
+    console.log(a_error);
+  };
+
   render() {
     return (
       <View style={styles.container}>
         <Banner />
         <Form>
           <Heading>Inscription</Heading>
-          <Error error={""} />
+          <Error error={this.state.error} />
           <Input
             placeholder="Email"
             keyboardType={"email-address"}
@@ -58,7 +99,12 @@ export default class LoginPage extends Component {
             value={this.state.email}
             onChangeText={(email) => this.setState({ email })}
           />
-          <Input placeholder="Pseudo" style={styles.input} />
+          <Input
+            placeholder="Pseudo"
+            style={styles.input}
+            value={this.state.username}
+            onChangeText={(username) => this.setState({ username })}
+          />
           <Input
             placeholder="Mot de passe"
             secureTextEntry
@@ -70,15 +116,14 @@ export default class LoginPage extends Component {
             placeholder="Confirmation MDP"
             secureTextEntry
             style={styles.input}
-          />
-          <FormButton
-            title={"Valider"}
-            onPress={() =>
-              this.createUser("Test", this.handleEmail, this.handlePassword)
+            value={this.state.confirmedPassword}
+            onChangeText={(confirmedPassword) =>
+              this.setState({ confirmedPassword })
             }
           />
+          <FormButton title={"Valider"} onPress={() => this.createUser()} />
           <TextButton
-            title={"Retourner a l'inscription"}
+            title={"Retourner a la connexion"}
             onPress={() => this.props.navigation.push("Connexion")}
           />
         </Form>

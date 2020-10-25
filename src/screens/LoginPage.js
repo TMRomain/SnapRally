@@ -25,11 +25,11 @@ export default class LoginPage extends Component {
       auth()
         .signInWithEmailAndPassword(email, password)
         .then(() => {
-          console.log("Signed in!");
+          console.log("Connecter!");
         })
         .catch((error) => {
           if (error.code === "auth/invalid-email") {
-            console.log("Email Invalide");
+            console.log("Cette email est invalide");
           }
           if (error.code === "auth/user-not-found") {
             console.log("Utilisateur non trouver");

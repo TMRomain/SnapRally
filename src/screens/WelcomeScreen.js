@@ -14,20 +14,19 @@ export default class WelcomeScreen extends Component {
     //constructor to set default state
     super(props);
     this.state = {
-      email: auth().currentUser.email,
+      user: auth().currentUser,
     };
   }
   LogOut = () => {
     auth()
       .signOut()
-      .then(() => console.log("User signed out!"));
+      .then(() => console.log("Utilisateur deconnecter!"));
   };
-
   render() {
     return (
       <View style={styles.container}>
         <Banner />
-        <Text>Bonjour : {this.state.email}</Text>
+        <Text>Bonjour {this.state.user.email}</Text>
         <FormButton title={"Se déconnecter "} onPress={() => this.LogOut()} />
       </View>
     );
