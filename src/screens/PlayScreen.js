@@ -13,20 +13,15 @@ export default class WelcomeScreen extends Component {
       user: auth().currentUser,
     };
   }
-  LogOut = () => {
-    auth()
-      .signOut()
-      .then(() => console.log("Utilisateur deconnecter!"));
-  };
   render() {
     return (
       <View style={styles.container}>
         <Banner />
            <Form>
               <Text>Bonjour {this.state.user.email}</Text>
-              <FormButton title={"Jouer"} onPress={() => this.props.navigation.push("PlayScreen")} />
-              <FormButton title={"Créer parcours"} onPress={() => this.LogOut()} />
-              <FormButton title={"Se déconnecter "} onPress={() => this.LogOut()} />
+              <FormButton title={"Par Utilisateur "}/>
+              <FormButton title={"Selon Position"} onPress={() => this.props.navigation.push("PositionScreen")}/>
+              <FormButton title={"Retour"} onPress={() => this.props.navigation.push("WelcomeScreen")} />
            </Form>
       </View>
     );

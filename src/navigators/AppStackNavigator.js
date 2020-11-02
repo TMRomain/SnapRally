@@ -1,5 +1,7 @@
 //Components
-import WelcomScreen from "../screens/WelcomeScreen";
+import WelcomeScreen from "../screens/WelcomeScreen";
+import PlayScreen from "../screens/PlayScreen";
+import PositionScreen from "../screens/PositionScreen";
 
 //Library
 import React from "react";
@@ -18,7 +20,9 @@ export function AppStackNavigator() {
         animationEnabled: false,
       }}
     >
-      <AppStack.Screen name="WelcomScreen" component={WelcomScreen} />
+      <AppStack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+      <AppStack.Screen name="PlayScreen" component={PlayScreen} />
+      <AppStack.Screen name="PositionScreen" component={PositionScreen} />
     </AppStack.Navigator>
   );
 }
