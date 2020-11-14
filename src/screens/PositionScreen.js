@@ -1,9 +1,9 @@
 import { StyleSheet, View, Text } from "react-native";
-import React, { Component } from "react";
+import React, { Component,useState,useEffect } from "react";
 import { Banner } from "../components/Banner";
 import { Form } from "../components/Form";
 import auth from "@react-native-firebase/auth";
-import MapView, { PROVIDER_GOOGLE,Marker } from 'react-native-maps';
+import MapView, { PROVIDER_GOOGLE,Marker,AnimatedRegion } from 'react-native-maps';
 import { Observable } from 'rxjs';
 import {
   accelerometer,
@@ -12,34 +12,65 @@ import {
   SensorTypes
 } from "react-native-sensors";
 import { map, filter } from "rxjs/operators";
+import Geolocation from '@react-native-community/geolocation';
 
-setUpdateIntervalForType(SensorTypes.gyroscope, 400); // defaults to 100ms
-
-
-
-
+setUpdateIntervalForType(SensorTypes.accelerometer, 400);
+ // defaults to 100ms
 export default class WelcomeScreen extends Component {
   
+
   constructor(props) {
     super(props);
     this.state = {
       observable: null,
       user: auth().currentUser,
     }; 
-    const subscription = gyroscope.subscribe(({ x, y, z, timestamp }) =>
-    this.setState({x:x.toFixed(4),y:y,z,z}),
-    );
-   
+    this.region = {
+      latitude: 48.8345481,
+      longitude: -67.5187402,
+      latitudeDelta: 0.015,
+      longitudeDelta: 0.0121,
+    }
+    this.position = {
+      latitude: 10,
+      longitude: 10,
+      latitudeDelta: 0.001,
+      longitudeDelta: 0.001,
+    }
   }
 
-  region = {
-    latitude: 48.8345481,
-    longitude: -67.5187402,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.0121,
+  componentDidMount(){
+    const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) =>
+    this.setState({x:x,y:y,z:z}),    
+    );
   }
-  render() {
+  _getPosition(){
+    Geolocation.getCurrentPosition((pos) => {
+      const crd = pos.coords;
+      this.position.latitude =  crd.latitude;
+      this.position.longitude =  crd.longitude;
+      this.position.latitudeDelta=  0.0421;
+      this.position.longitudeDelta= 0.0421;
+    });
+  }
+
+  _getAngle(x,y,z){
+    var normOfG = Math.sqrt(x*x+y*y+z*z);
+    var normX = x/ normOfG;
+    var normY = y/ normOfG;
+    var normZ = z/ normOfG;
     
+    this.AngleX = Math.round(Math.acos(normX)*180/Math.PI);
+    this.AngleY = Math.round(Math.acos(normY)*180/Math.PI);
+    this.AngleZ = Math.round(Math.acos(normZ)*180/Math.PI);
+  }
+ 
+
+
+
+  render() {
+    this._getPosition();
+    this._getAngle(this.state.x,this.state.y,this.state.z);
     return (
       <View style={styles.container}>
         <Banner />
@@ -47,15 +78,16 @@ export default class WelcomeScreen extends Component {
               <Text>Parcours autour de vous {this.state.user.displayName}</Text>
               <View style={styles.border} >
               <MapView
-       provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-       style={styles.map}
-       region={this.region}
-     >
+              provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+              style={styles.map}
+              initialRegion={this.region}
+              >
            <Marker coordinate={{ latitude: 48.846044, longitude: -67.532731}}title={"Parcours Test"} />
+           <Marker coordinate={{ latitude: this.position.latitude, longitude: this.position.longitude}}title={"Ma postion "} />
      </MapView>
      </View>
-     <Text>Votre position en X :{this.state.x}</Text>
-     <Text>Votre position en Y :{this.state.y}</Text>
+     <Text>L'angle de votre telephone en X:{this.AngleX}</Text>
+     <Text>L'angle de votre telephone en Y :{this.AngleY}</Text>
            </Form>
       </View>
     );
