@@ -2,13 +2,29 @@ import { StyleSheet, View, Text,TouchableOpacity } from "react-native";
 import React, { Component } from "react";
 import auth from "@react-native-firebase/auth";
 import { RNCamera, FaceDetector } from 'react-native-camera';
+import {getEtapes,addEtape} from "../api/EtapeApi";
+import Sensors from '../logics/PhoneSensors';
+
 
 export default class CaptureScreen extends Component {
   constructor(props) {
     //constructor to set default state
     super(props);
+    this.sensors = new Sensors();
+
     this.state = {
       user: auth().currentUser,
+      etape: {
+        nomImage: '',
+        latitudeEtape: 0,
+        longitudeEtape: 0,
+        degreeEtape:0,
+        angleXEtape:0,
+        angleYEtape:0,
+        angleZEtape:0,
+      },
+
+
     };
   }
   render() {
@@ -52,8 +68,23 @@ export default class CaptureScreen extends Component {
       const options = { quality: 0.5, base64: true };
       const data = await this.camera.takePictureAsync(options);
       console.log(data.uri);
+      this.sendData(data);
     }
   };
+
+  sendData = async (data,addComplete) => {
+    if (this.camera) {
+     this.state.etape.nomImage = data.uri;
+     this.state.etape.latitudeEtape = 5;
+     this.state.etape.longitudeEtape = 6;
+     this.state.etape.degreeEtape = 7;
+     this.state.etape.angleXEtape = 8;
+     this.state.etape.angleYEtape = 9;
+     this.state.etape.angleZEtape = 10;
+     addEtape(this.state.etape,addComplete);
+    }
+  };
+
 }
 const styles = StyleSheet.create({
   container: {
