@@ -23,10 +23,9 @@ export default class CaptureScreen extends Component {
         angleYEtape:0,
         angleZEtape:0,
       },
-
-
     };
   }
+  
   render() {
     return (
       <View style={styles.container}>
