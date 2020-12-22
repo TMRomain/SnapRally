@@ -80,10 +80,9 @@ export default class CaptureScreen extends Component {
      this.state.etape.angleXEtape = 8;
      this.state.etape.angleYEtape = 9;
      this.state.etape.angleZEtape = 10;
-     addEtape(this.state.etape,addComplete);
+     addEtape(this.state.etape);
     }
   };
-
 }
 const styles = StyleSheet.create({
   container: {
