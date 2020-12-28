@@ -4,13 +4,15 @@ import { Banner } from "../components/Banner";
 import { Form } from "../components/Form";
 import { FormButton } from "../components/FormButton";
 import auth from "@react-native-firebase/auth";
+import {getUser}from "../api/UserApi";
+import {getEtapes,addEtape} from "../api/EtapeApi";
 
 export default class WelcomeScreen extends Component {
   constructor(props) {
     //constructor to set default state
     super(props);
     this.state = {
-      user: auth().currentUser,
+      user: getUser(),
     };
   }
   LogOut = () => {
@@ -35,5 +37,6 @@ export default class WelcomeScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    
   },
 });

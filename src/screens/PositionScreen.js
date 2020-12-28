@@ -1,10 +1,12 @@
 import { StyleSheet, View, Text } from "react-native";
-import React, { Component ,useState} from "react";
+import React, { Component ,Fragment,useState} from "react";
 import { Banner } from "../components/Banner";
 import { Form } from "../components/Form";
 import auth from "@react-native-firebase/auth";
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Sensors from '../logics/PhoneSensors';
+import { FormButton } from "../components/FormButton";
+import { getEtape } from "../api/EtapeApi";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -12,10 +14,10 @@ import {
 } from "react-native-sensors";
 
 setUpdateIntervalForType(SensorTypes.accelerometer, 400);
+let etapes;
 
 
 export default class WelcomeScreen extends Component {
-
   
   constructor(props) {
     super(props);
@@ -53,18 +55,42 @@ export default class WelcomeScreen extends Component {
               region={this.region}
             >
               <Marker coordinate={{ latitude: 48.846044, longitude: -67.532731 }} title={"Parcours Test"} />
-              <Marker coordinate={{latitude: this.sensors.position.latitude, longitude: this.sensors.position.longitude }} title={"Ma postion"} style={{backgroundColor:'#ccc',transform: [{rotate: this.sensors.Degree+"deg"}],}}   />
+              <Marker coordinate={{latitude: this.sensors.position.latitude, longitude: this.sensors.position.longitude }} title={"Ma postion"} style={{backgroundColor:'#ccc',transform: [{rotate: this.sensors.Degree+"deg"}],}}/>
+              <AfficherEtape />
+
+
             </MapView>
           </View>
-          <Text>L'angle de votre telephone en X:{this.sensors.AngleX}</Text>
-          <Text>L'angle de votre telephone en Y :{this.sensors.AngleY}</Text>
-          <Text>L'angle de votre telephone en Z :{this.sensors.AngleZ}</Text>
-          <Text>Votre rotation est de  :{this.sensors.Degree+"deg"}</Text>
+          <FormButton title={"Afficher Etape"} style = {styles.input} onPress={() => recuperEtape()} />
         </Form>
       </View>
     );
   }
 }
+
+
+
+function recuperEtape(){
+  etapes  = Object.values(getEtape());
+}
+function AfficherEtape(){
+  if(etapes != null){
+    return (
+     <View>
+         {etapes.map((item, key)=>(
+          <Marker coordinate={{ latitude: item.etapeData.latitudeEtape, longitude: item.etapeData.longitudeEtape }} title={"Parcours Test"} />
+         ))}
+ 
+     </View>
+    );
+  }
+  return(
+    <Fragment>
+
+    </Fragment>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

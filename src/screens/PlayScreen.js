@@ -18,7 +18,6 @@ export default class WelcomeScreen extends Component {
       <View style={styles.container}>
         <Banner />
            <Form>
-              <Text>Bonjour {this.state.user.email}</Text>
               <FormButton title={"Par Utilisateur "}/>
               <FormButton title={"Selon Position"} onPress={() => this.props.navigation.push("PositionScreen")}/>
               <FormButton title={"Retour"} onPress={() => this.props.navigation.push("WelcomeScreen")} />

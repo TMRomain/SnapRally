@@ -19,7 +19,7 @@ export default class ParcoursScreen extends Component {
         <Banner />
            <Form>
               <Text>Bonjour {this.state.user.email}</Text>
-              <FormButton title={"Mode Aventure"} onPress={() => this.props.navigation.push("AdventureScreen")}/>
+              <FormButton title={"Mode Aventure"} onPress={() => this.props.navigation.push("AdventureScreen",{nouveauxRally : true})}/>
               <FormButton title={"Contre la montre"} onPress={() => this.props.navigation.push("PositionScreen")}/>
               <FormButton title={"Retour"} onPress={() => this.props.navigation.push("WelcomeScreen")} />
            </Form>
