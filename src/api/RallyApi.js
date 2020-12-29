@@ -3,6 +3,7 @@ import firebase from "firebase";
 import uuid from 'react-native-uuid';
 import { addEtape } from "../api/EtapeApi";
 import Rally from "../class/Rally";
+import database from '@react-native-firebase/database';
 
 let etapes;
 var config = {
@@ -12,25 +13,22 @@ var config = {
 };
 
 export function AddRally(rallyData){
-    console.log(rallyData);
-    firebase.database().ref('Rally/').push({
-        rallyData,
-    }).then((data)=>{
-        //success callback
-        console.log('data ' , data)
-    }).catch((error)=>{
-        //error callback
-        console.log('error ' , error)
+    database()
+    .ref('Rally/')
+    .push({
+        rallyData
     })
+    .then(() => console.log('Rally Upload sur le serveur'));
 }
 
 export function CreateRally(nomRally,lesEtapes){
-    console.log(nomRally);
-    const randUuid = uuid.v1(); 
+    let randUuid = uuid.v1(); 
     let rally = new Rally();
     let numberOfEtape = 0;
+    
     rally.nomRally = nomRally;
     rally.linkRally = randUuid;
+
     lesEtapes.map((item, index) => {
         item.linkRally = randUuid;
         addEtape(item);

@@ -1,6 +1,8 @@
 //import firebase from "react-native-firebase";
 import firebase from "firebase";
 import uuid from 'react-native-uuid';
+import database from '@react-native-firebase/database';
+
 
 let etapes;
 var config = {
@@ -16,17 +18,27 @@ if (!firebase.apps.length) {
 export function addEtape(etapeData){
     let imageName = uploadImage(etapeData.nomImage);
     etapeData.nomImage = imageName;
-    firebase.database().ref('Etape/').push({
-        etapeData,
-    }).then((data)=>{
-        //success callback
-        console.log('Succes ')
-        console.log('data ' , data)
-    }).catch((error)=>{
-        //error callback
-        console.log('Error ');
-        console.log('error ' , error)
+
+    database()
+    .ref('Etape/')
+    .push({
+      etapeData
     })
+    .then(() => console.log('Etape Upload sur le serveur'));
+
+
+
+    // firebase.database().ref('Etape/').push({
+    //     etapeData,
+    // }).then((data)=>{
+    //     //success callback
+    //     console.log('Succes ')
+    //     console.log('data ' , data)
+    // }).catch((error)=>{
+    //     //error callback
+    //     console.log('Error ');
+    //     console.log('error ' , error)
+    // })
 }
 
 export function uploadImage(imageUri){
