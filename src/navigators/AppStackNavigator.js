@@ -6,6 +6,7 @@ import ParcoursScreen from "../screens/ParcoursScreen";
 import AdventureScreen from "../screens/AdventureScreen";
 import CaptureScreen from "../screens/CaptureScreen";
 import ValideEtape from "../screens/ValideEtape";
+import MapScreen from "../screens/MapScreen";
 //Library
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -27,6 +28,7 @@ export function AppStackNavigator() {
       <AppStack.Screen name="AdventureScreen" component={AdventureScreen} />
       <AppStack.Screen name="CaptureScreen" component={CaptureScreen} />
       <AppStack.Screen name="ValideEtape" component={ValideEtape} />
+      <AppStack.Screen name="MapScreen" component={MapScreen} />
     </AppStack.Navigator>
   );
 }

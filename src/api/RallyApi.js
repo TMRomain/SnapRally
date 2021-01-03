@@ -28,6 +28,8 @@ export function CreateRally(nomRally,lesEtapes){
     
     rally.nomRally = nomRally;
     rally.linkRally = randUuid;
+    rally.dateRally = new Date();
+
 
     lesEtapes.map((item, index) => {
         item.linkRally = randUuid;
