@@ -7,5 +7,4 @@ export default class Etape{
         angleXEtape= 0;
         angleYEtape= 0;
         angleZEtape= 0;
-        linkRally= "";
 }

@@ -58,20 +58,21 @@ export default class ValideEtape extends Component {
 
   componentDidMount(){
     if(this.props.route.params != null){
-      console.log("Creation de l'etape");
+      //console.log("Creation de l'etape");
       if(this.props.route.params.estNouveau == true){
-        console.log("Nouvelle Etape");
+        //console.log("Nouvelle Etape");
         etapeValide = new Etape();
         isModify = false;
+        this.forceUpdate();
       }else{
         if(this.props.route.params.lesEtapes != null){
-          console.log("Etape Modfier");
+          //console.log("Etape Modfier");
           isModify = true;
           index = this.props.route.params.index;
           etapeValide = this.props.route.params.lesEtapes[this.props.route.params.index];
           this.setState({nomEtape : this.props.route.params.lesEtapes[this.props.route.params.index].nomEtape});
         }else{
-          console.log("Etape depuis la cameras");
+          //console.log("Etape depuis la cameras");
           etapeValide = this.props.route.params.etapeValue;
           this.setState({nomEtape : this.props.route.params.etapeValue.nomEtape});
         }
@@ -96,7 +97,7 @@ export default class ValideEtape extends Component {
           <FormButton
             title={"Retour"}
             style = {styles.input}
-            onPress={() => this.props.navigation.push("AdventureScreen")}
+            onPress={() => this.props.navigation.push("CreateRallyScreen")}
           />
         </Form>
       </View>
@@ -109,13 +110,13 @@ function Valider() {
     etapeValide.nomEtape = nomEtape;
     if (etapeValide.nomEtape != "") {
       if (isModify == true) {
-        return props.navigation.push("AdventureScreen", {
+        return props.navigation.push("CreateRallyScreen", {
           etapeValide: etapeValide,
           estFait: false,
           index: index,
         });
       }
-      return props.navigation.push("AdventureScreen", {
+      return props.navigation.push("CreateRallyScreen", {
         etapeValide: etapeValide,
         estFait: false,
       });
@@ -141,5 +142,5 @@ const styles = StyleSheet.create({
   },
   input: {
     margin: 5,
-  },
+  }
 });

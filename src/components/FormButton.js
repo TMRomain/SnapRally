@@ -21,5 +21,6 @@ const styles = StyleSheet.create({
   text: {
     color: "rgba(255,255,255,1)",
     fontSize: 24,
+    textAlign:"center",
   },
 });

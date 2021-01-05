@@ -4,12 +4,19 @@ import { Banner } from "../components/Banner";
 import { Form } from "../components/Form";
 import { FormButton } from "../components/FormButton";
 import auth from "@react-native-firebase/auth";
-import { Input } from "../components/Input";
-import { CreateRally } from "../api/RallyApi";
+import {IconButton} from "../components/IconButton";
 
 let lesEtapes = [];
 
+const buttonProps = {
+  style: null,
+  onPress: () => this.props.navigation.push("ValidateRallyScreen",{lesEtapes}),
+}
+
+
 function AfficherEtape() {
+  let keyToSet = 0;
+
   if (lesEtapes.length == 0) {
     return (
       <Fragment>
@@ -26,8 +33,9 @@ function AfficherEtape() {
   return (
     <Fragment>
       {lesEtapes.map((item, index) => {
+        keyToSet++;
         return (
-          <FormButton
+          <FormButton key = {keyToSet}
             title={item.nomEtape}
             style={styles.input}
             onPress={() => this.props.navigation.push("ValideEtape",{
@@ -39,6 +47,7 @@ function AfficherEtape() {
         );
       })}
       <FormButton
+            key = {keyToSet+1}
             title={"+"}
             onPress={() =>
               this.props.navigation.push("ValideEtape", {
@@ -50,7 +59,7 @@ function AfficherEtape() {
     </Fragment>
   );
 }
-export default class AdventureScreen extends Component {
+export default class CreateRallyScreen extends Component {
   constructor(props) {
     //constructor to set default state
     super(props);
@@ -58,7 +67,6 @@ export default class AdventureScreen extends Component {
     this.state = {
       user: auth().currentUser,
     };
-    ValiderRally = ValiderRally.bind(this)
   }
 
   componentDidMount() {
@@ -70,7 +78,7 @@ export default class AdventureScreen extends Component {
         lesEtapes = [];
       }
     }
-    console.log(lesEtapes);
+    this.forceUpdate();
   }
 
   render() {
@@ -84,21 +92,25 @@ export default class AdventureScreen extends Component {
         this.setState({ isDone: true });
       }
     }
-
+    if(lesEtapes.length == 0){
+      buttonProps.style = styles.button;
+      buttonProps.onPress = () => console.log("test");
+    }else{
+      buttonProps.onPress = () => this.props.navigation.push("ValidateRallyScreen",{Etapes : lesEtapes});
+      buttonProps.style = null;
+    }
+  
     return (
       <View style={styles.container}>
         <Banner />
         <ScrollView >
         <Form>
-          <Input
-            placeholder="Nom du rally"
-            value={this.state.nomRally}
-            onChangeText={(nomRally) => this.setState({ nomRally })}
-          />
+        <Text>Créer les étapes de votre Rally</Text>
+        <IconButton style = {styles.closeButton} sourceImage={require('../../assets/icons/close.png')} onPress={() =>  this.props.navigation.push("WelcomeScreen")}/>
           <AfficherEtape />
           <FormButton
-            title={"Valider Rally"}
-            onPress={() => ValiderRally(this.state.nomRally)}
+            title={"Valider les étapes"}
+            {...buttonProps}
           />
         </Form>
         </ScrollView>
@@ -106,14 +118,17 @@ export default class AdventureScreen extends Component {
     );
   }
 }
-
-function ValiderRally(nomRally){
-  CreateRally(nomRally,lesEtapes);
-  this.props.navigation.push("PlayScreen");
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  button:{
+    backgroundColor: "rgba(191, 191, 191,1)",
+  },
+  closeButton:{
+    position: "absolute",
+    right : -20,
+    top:-20,
+    borderRadius: 40,
   },
 });

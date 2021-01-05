@@ -1,5 +1,6 @@
 //import firebase from "react-native-firebase";
 import firebase from "firebase";
+//use import firebase from '@react-native-firebase/storage'; later
 import uuid from 'react-native-uuid';
 import database from '@react-native-firebase/database';
 
@@ -24,7 +25,9 @@ export function addEtape(etapeData){
     .push({
       etapeData
     })
-    .then(() => console.log('Etape Upload sur le serveur'));
+    .then(() => console.log('Etape Upload sur le serveur'))
+    .catch((error) => console.log('Erreur serveur :'+error))
+    ;
 
 
 

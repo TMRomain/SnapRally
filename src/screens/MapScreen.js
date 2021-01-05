@@ -1,13 +1,10 @@
-import { StyleSheet, View, Text,Dimensions } from "react-native";
+import { StyleSheet, View, Text,Dimensions,Image } from "react-native";
 import React, { Component ,Fragment,useState} from "react";
-import { Banner } from "../components/Banner";
-import { Form } from "../components/Form";
 import auth from "@react-native-firebase/auth";
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
 import Sensors from '../logics/PhoneSensors';
-import {FormButton} from "../components/FormButton";
 import {IconButton} from "../components/IconButton";
-import { getEtape } from "../api/EtapeApi";
+import { getRally } from "../api/RallyApi";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -16,45 +13,38 @@ import {
 
 setUpdateIntervalForType(SensorTypes.accelerometer, 400);
 
-let etapes;
+let lesRallys;
 let lockOnUser = false;
 let doOnce = false;
 let mapView;
+
+const mapProps = {
+  scrollEnabled: true,
+  zoomEnabled: false,
+  region: undefined,
+
+}
+
 function MapRender(){
-    if(lockOnUser){
         return(
             <Fragment>
             <MapView
-            ref = {(ref)=>this.mapView=ref}
+            ref = {(ref)=>mapView=ref}
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={styles.map}
+            minZoomLevel = {13}
             initialRegion={this.region}
-            region={this.region}
-            showsPointsOfInterest = {false}
-            scrollEnabled= {false}
-            zoomEnabled= {false}
+            {...mapProps}
+            onRegionChangeComplete={(region) => {
+              recuperRally(region);
+          }}
             >
-            <Marker coordinate={{latitude: this.sensors.position.latitude, longitude: this.sensors.position.longitude }} title={"Ma postion"} style={{backgroundColor:'#ccc',transform: [{rotate: this.sensors.Degree+"deg"}],}}/>
+            <AfficherRallys />
+            <Marker coordinate={{latitude: this.sensors.position.latitude, longitude: this.sensors.position.longitude }} title={"Ma position"} style={{backgroundColor:'#ccc',transform: [{rotate: this.sensors.Degree+"deg"}],}}/>
             </MapView>
            </Fragment>
         )
-    }
-    return(
-        <Fragment>
-        <MapView
-        ref = {(ref)=>this.mapView=ref}
-        provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-        style={styles.map}
-        initialRegion={this.region}
-        showsPointsOfInterest = {false}
-        scrollEnabled= {true}
-        zoomEnabled= {true}
-        onMapReady ={this.remap}
-        >
-        <Marker coordinate={{latitude: this.sensors.position.latitude, longitude: this.sensors.position.longitude }} title={"Ma test"} style={{backgroundColor:'#ccc',transform: [{rotate: this.sensors.Degree+"deg"}],}}/>
-        </MapView>
-       </Fragment>
-    )
+
 }
 
 export default class MapScreen extends Component {
@@ -66,6 +56,7 @@ export default class MapScreen extends Component {
     this.state = {
       user: auth().currentUser,
     };
+    recuperRally = recuperRally.bind(this)
     MapRender = MapRender.bind(this)
     this.remap = this.remap.bind(this)
   }
@@ -77,11 +68,9 @@ export default class MapScreen extends Component {
 
   remap(){
     setTimeout(() => {
-      this.mapView.animateToRegion(this.region, 500)
-      mapView = this.mapView;
+        mapView.animateToRegion(this.region, 500)
       }, 1000)
   }
-
 
   render() {
     this.sensors.getCurrentPosition();
@@ -93,47 +82,73 @@ export default class MapScreen extends Component {
       latitudeDelta: 0.015,
       longitudeDelta: 0.0121,
     }
+
+    //Change map props when changin lock state
     var icon = lockOnUser? require('../../assets/icons/Lock.png'):require('../../assets/icons/Unlock.png');
+    mapProps.scrollEnabled = !lockOnUser;
+    mapProps.zoomEnabled = !lockOnUser;
+    lockOnUser? mapProps.region = this.region :mapProps.region = undefined;
     
     return (
       <View style={styles.container}>
-        <Form>
           <View style={styles.border} >
           <MapRender/>
           </View>
+        
+        <IconButton style = {styles.optionButton} sourceImage={require('../../assets/icons/Option.png')} onPress={() => this.props.navigation.push("WelcomeScreen")}/>
+
+        <IconButton style = {styles.mainButton} sourceImage={require('../../assets/icons/Menu.png')} onPress={() => recuperRally(this.region)}/>
         <Text style={styles.textOver}>Parcours autour de vous {this.state.user.displayName}</Text>
         <View style = {styles.groupRight}>
           <IconButton style = {styles.input} sourceImage={icon} onPress={() => lockOnUser = !lockOnUser} />
           <IconButton style = {styles.input} sourceImage={require('../../assets/icons/Position.png')} onPress={() => mapView.animateToRegion(this.region, 2000)}/>
         </View>
-
-        </Form>
       </View>
     );
   }
 }
 
-
-
-function recuperEtape(){
-  etapes  = Object.values(getEtape());
+function recuperRally(region){
+  mapView.getCamera().then((cameraValues) => {
+    getRally(region,cameraValues.zoom).then((rallys) => {
+      if(rallys != undefined && rallys != null){
+        lesRallys = rallys;
+       }
+    });
+  });
 }
-function AfficherEtape(){
-  if(etapes != null){
-    return (
-     <View>
-         {etapes.map((item, key)=>(
-          <Marker coordinate={{ latitude: item.etapeData.latitudeEtape, longitude: item.etapeData.longitudeEtape }} title={"Parcours Test"} />
-         ))}
- 
-     </View>
-    );
+
+function AfficherRallys(){
+  let keyToAdd = 0;
+  if(lesRallys != null){
+    return(
+      <Fragment>
+      {lesRallys.map((rally, index) => {
+        keyToAdd++;
+        return (
+          <Marker
+          key = {keyToAdd}
+            coordinate={{
+              latitude: rally.latitudeStartRally,
+              longitude: rally.longitudeStartRally,
+            }}
+            title={rally.nomRally}
+            identifier={rally.nomRally}
+          >
+            <Image
+              source={require("../../assets/icons/Rally.png")}
+              style={{ width: 60, height: 60 }}
+            />
+          </Marker>
+        );
+      })}
+      </Fragment>
+    )
+
   }
   return(
-    <Fragment>
-
-    </Fragment>
-  );
+    <Fragment></Fragment>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -147,6 +162,20 @@ const styles = StyleSheet.create({
   border: {
     borderWidth: 3,
     borderColor: 'black'
+  }, 
+  mainButton: {
+    position: "absolute",
+    alignSelf: "center",
+    bottom:10,
+    width: 60,
+    height: 60,
+    borderRadius: 40,
+  },
+  optionButton: {
+    position: "absolute",
+    right : -5,
+    top:-5,
+    borderRadius: 40,
   },
   groupRight:{ 
     position: "absolute",
