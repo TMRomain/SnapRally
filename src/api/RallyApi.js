@@ -1,9 +1,10 @@
 // import firebase from "react-native-firebase";
 import firebase from "firebase";
 import uuid from 'react-native-uuid';
-import { addEtape } from "../api/EtapeApi";
+import { uploadImage } from "../api/EtapeApi";
 import Rally from "../class/Rally";
 import database from '@react-native-firebase/database';
+
 
 let etapes;
 var config = {
@@ -37,6 +38,8 @@ export function CreateRally(nomRally,lesEtapes){
         if(index == 0){
             rally.latitudeStartRally = getRandomFloat(item.latitudeEtape-distanceToSpawn,item.latitudeEtape+distanceToSpawn);
             rally.longitudeStartRally = getRandomFloat(item.longitudeEtape-distanceToSpawn,item.longitudeEtape+distanceToSpawn);
+            let imageName = uploadImage(item.nomImage);
+            item.nomImage = imageName;
         }
         rally.lesEtapes[index] = item;
         //addEtape(item);
@@ -59,6 +62,7 @@ export async function getRally(region,zoomValue) {
     await database().ref().once('value').then(snapshot => {
         rallys = snapshot.val();
     });
+    if(rallys != null &&rallys != undefined){
     rallys = Object.values(Object.values(rallys)[0]);
     rallys.map((rally, index) => {
         rally = Object.values(rally)[0];
@@ -72,7 +76,7 @@ export async function getRally(region,zoomValue) {
                 rallyArrayPos++;
             }
         }
-    });
+    });}
     return(rallysValider);
     // database().ref().once('value').then(snapshot => {
     //     rallys = snapshot.val();
