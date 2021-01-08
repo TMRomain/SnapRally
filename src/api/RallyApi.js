@@ -6,7 +6,6 @@ import Rally from "../class/Rally";
 import database from '@react-native-firebase/database';
 
 
-let etapes;
 var config = {
     databaseURL: "https://snaprally-b1071.firebaseio.com/",
     projectId: "snaprally-b1071",
@@ -38,15 +37,17 @@ export function CreateRally(nomRally,lesEtapes){
         if(index == 0){
             rally.latitudeStartRally = getRandomFloat(item.latitudeEtape-distanceToSpawn,item.latitudeEtape+distanceToSpawn);
             rally.longitudeStartRally = getRandomFloat(item.longitudeEtape-distanceToSpawn,item.longitudeEtape+distanceToSpawn);
-            let imageName = uploadImage(item.nomImage);
-            item.nomImage = imageName;
         }
+        let imageName = uploadImage(item.nomImage);
+        lesEtapes[index].nomImage = imageName;
         rally.lesEtapes[index] = item;
         //addEtape(item);
         numberOfEtape++;
     });
     rally.numberOfEtape = numberOfEtape;
     AddRally(rally);
+    lesEtapes = [];
+    rally = null;
 }
 
 function getRandomFloat(min, max) {

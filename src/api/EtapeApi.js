@@ -3,6 +3,7 @@ import firebase from "firebase";
 //use import firebase from '@react-native-firebase/storage'; later
 import uuid from 'react-native-uuid';
 import database from '@react-native-firebase/database';
+import storage from '@react-native-firebase/storage';
 
 
 let etapes;
@@ -49,46 +50,18 @@ export function uploadImage(imageUri){
     const filename = `${uuid.v1()}.${ext}`; // Generate unique name
     let uploading = true
 
-    firebase
-      .storage()
-      .ref(`etapes/images/${filename}`)
-      .put(imageUri)
-      .on(
-        firebase.storage.TaskEvent.STATE_CHANGED,
-        snapshot => {
-          let state = {};
-          state = {
-            ...state,
-            progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          };
-          if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-            const allImages = this.state.images;
-            allImages.push(snapshot.downloadURL);
-            state = {
-              ...state,
-              uploading : false,
-              imgSource: '',
-              imageUri: '',
-              progress: 0,
-              images: allImages
-            };
-            AsyncStorage.setItem('images', JSON.stringify(allImages));
-          }
-          //this.setState(state);
-        },
-        error => {
-          unsubscribe();
-          alert('Sorry, Try again.');
-        }
-      );
+    console.log(imageUri);
+    let reference = storage().ref("/etapes/images/"+filename);         // 2
+    let task = reference.putFile(imageUri);          // 3
+    task.then(() => {                                 // 4
+        console.log('Image uploaded to the bucket!');
+    }).catch((e) => console.log('uploading image error => ', e));
       return filename;
   };
 
-export function getEtape(){
-  firebase.database().ref('Etape/').once('value', function (snapshot) {
-    etapes = snapshot.val();
-});
-return etapes;
+export async function getImage(imageName){
+  var ref = firebase.storage().ref("/etapes/images/"+imageName);
+  return(await ref.getDownloadURL());
 }
 
 // export function addEtape(etape,addComplete){

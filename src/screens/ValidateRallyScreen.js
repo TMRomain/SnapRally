@@ -11,6 +11,7 @@ import CheckBox from "@react-native-community/checkbox";
 import { Picker } from "@react-native-picker/picker";
 
 let isAgainstTime = false;
+let lesEtapes;
 
 export default class ValidateRallyScreen extends Component {
   constructor(props) {
@@ -27,9 +28,11 @@ export default class ValidateRallyScreen extends Component {
       .signOut()
       .then(() => console.log("Utilisateur deconnecter!"));
   };
-
+  componentDidMount(){
+    lesEtapes = this.props.route.params.Etapes;
+  }
   render() {
-    return (
+  return (
       <View style={styles.container}>
         <Banner />
         <Form>
@@ -73,7 +76,7 @@ export default class ValidateRallyScreen extends Component {
 }
 
 function ValiderRally(nomRally) {
-  CreateRally(nomRally,this.props.route.params.Etapes);
+  CreateRally(nomRally,lesEtapes);
   this.props.navigation.push("WelcomeScreen");
 }
 

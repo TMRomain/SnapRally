@@ -5,6 +5,7 @@ import MapView, { PROVIDER_GOOGLE, Marker, Circle } from "react-native-maps";
 import Sensors from "../logics/PhoneSensors";
 import { IconButton } from "../components/IconButton";
 import { getRally } from "../api/RallyApi";
+import { getImage } from "../api/EtapeApi";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -69,6 +70,7 @@ export default class MapScreen extends Component {
     this.state = {
       user: auth().currentUser,
       selectedRally: null,
+      urlImageEtape : null,
       isRallyInProgress: false,
       etapeActuel: 0,
     };
@@ -76,6 +78,7 @@ export default class MapScreen extends Component {
     lancerLeRally = lancerLeRally.bind(this);
     quitterLeRally = quitterLeRally.bind(this);
     MapRender = MapRender.bind(this);
+    getUrlImage = getUrlImage.bind(this);
 
     AfficherRallys = AfficherRallys.bind(this);
     AfficherEtape = AfficherEtape.bind(this);
@@ -198,6 +201,10 @@ function Menu() {
         <Text>
           Nombre d'etape : {this.state.selectedRally.lesEtapes.length}
         </Text>
+        <Image
+          style ={styles.image}
+          source={{uri: this.state.urlImageEtape}}
+        />
         <FormButton
           title={"Faire se Rally"}
           onPress={() => {
@@ -208,11 +215,21 @@ function Menu() {
     </Fragment>
   );
 }
-
+function getUrlImage(rally){
+  getImage(rally.lesEtapes[0].nomImage).then((urlImage) => {
+    if (urlImage != undefined && urlImage != null) {
+      this.setState({urlImageEtape:urlImage});
+    }
+  });
+}
 function RallyButton() {
   if (this.state.isRallyInProgress == true) {
     return (
       <Fragment>
+       <Image
+          style ={styles.imageToReproduce}
+          source={{uri: this.state.urlImageEtape}}
+        />
         <View style={styles.groupRight}>
           <IconButton
             style={styles.input}
@@ -270,6 +287,7 @@ function AfficherRallys() {
               onPress={() => {
                 isMarkerSelected = true;
                 this.setState({ selectedRally: rally });
+                getUrlImage(rally);
               }}
               coordinate={{
                 latitude: rally.latitudeStartRally,
@@ -343,5 +361,15 @@ const styles = StyleSheet.create({
     height: 200,
     width: 300,
     bottom: 0,
+  },
+  image: {
+    height: 100,
+    width: 100,
+  },
+  imageToReproduce: {
+    height: 200,
+    width: 100,
+    bottom: 300, 
+    left: 250, 
   },
 });

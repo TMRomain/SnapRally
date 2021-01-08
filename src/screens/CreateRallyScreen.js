@@ -34,7 +34,8 @@ function AfficherEtape() {
     <Fragment>
       {lesEtapes.map((item, index) => {
         keyToSet++;
-        return (
+        if(item != null){
+          return (
           <FormButton key = {keyToSet}
             title={item.nomEtape}
             style={styles.input}
@@ -45,6 +46,7 @@ function AfficherEtape() {
             )}
           />
         );
+        }
       })}
       <FormButton
             key = {keyToSet+1}
@@ -80,8 +82,9 @@ export default class CreateRallyScreen extends Component {
     }
     this.forceUpdate();
   }
-
+ 
   render() {
+
     if (this.props.route.params != null && this.state.isDone == false) {
       if(this.props.route.params.index != null){
         lesEtapes[this.props.route.params.index] = this.props.route.params.etapeValide;
