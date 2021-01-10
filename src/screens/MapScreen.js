@@ -100,7 +100,7 @@ export default class MapScreen extends Component {
   }
 
   render() {
-    this.sensors.getCurrentPosition();
+    //this.sensors.getCurrentPosition();
     this.sensors.getAngle();
     this.sensors.getCompass();
     this.region = {
@@ -234,7 +234,7 @@ function RallyButton() {
           <IconButton
             style={styles.input}
             sourceImage={require("../../assets/icons/Photo.png")}
-            onPress={() => console.log("Prendre une Photo")}
+            onPress={() => this.props.navigation.push("SolveRallyScreen",{etapeActuel : this.state.selectedRally.lesEtapes[this.state.etapeActuel],urlImage: this.state.urlImageEtape})}
           />
           <IconButton
             style={styles.input}
