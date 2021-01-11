@@ -32,6 +32,7 @@ function cameraStyle(){
 function isInRange(value,comparateValue){
     comparateValue = comparateValue.toFixed(5);
     value = value.toFixed(5);
+
     if(value == comparateValue || value <= Number(comparateValue) + Number(comparationTreshold) && value >= Number(comparateValue) - Number(comparationTreshold) ){
         return(true);
     }else{
@@ -40,19 +41,26 @@ function isInRange(value,comparateValue){
 }
 
 function isAlign(){
-    if(this != undefined && this.state.etape != undefined){
-        if(isInRange(this.sensors.position.latitude,this.state.etape.latitudeEtape)){
-            if(isInRange(this.sensors.position.longitude,this.state.etape.longitudeEtape)){
-                return true;
+    if(this != undefined && this.state.currentRally != undefined){
+      console.log(this.state.currentRally.getCurrentEtape().latitudeEtape)
+      console.log(this.sensors.position.latitude)
+      console.log(isInRange(this.sensors.position.latitude,this.state.currentRally.getCurrentEtape().latitudeEtape));
+      console.log(this.state.currentRally.getCurrentEtape().longitudeEtape)
+      console.log(this.sensors.position.longitude)
+      console.log(isInRange(this.sensors.position.longitude,this.state.currentRally.getCurrentEtape().longitudeEtape));
+        if(isInRange(this.sensors.position.latitude,this.state.currentRally.getCurrentEtape().latitudeEtape)){
+            if(isInRange(this.sensors.position.longitude,this.state.currentRally.getCurrentEtape().longitudeEtape)){
+               console.log("Bonne Photo");
+               return;
             }
         }
     }
-    return false;
+    console.log("Mauvaise Photo");
 }
 
 function DebugInfo(){
     if(this!= undefined){
-        if(this.state.etape!= undefined && this.sensors != undefined){
+        if(this.state.currentRally != undefined && this.sensors != undefined){
             return(
                 <Fragment>
                 <View style= {styles.debugInfo}>
@@ -63,8 +71,6 @@ function DebugInfo(){
             )
         }
     }
-
-
     return(
         <Fragment>
         </Fragment>
@@ -79,6 +85,7 @@ export default class SolveRallyScreen extends Component {
     this.state = {
       user: auth().currentUser,
       isAlign : false,
+      currentImage: null,
     };
     cameraStyle = cameraStyle.bind(this);
     isAlign = isAlign.bind(this);
@@ -89,27 +96,14 @@ export default class SolveRallyScreen extends Component {
       this.setState({ x: x, y: y, z: z })
     );
     if(this.props.route.params != null){
-        this.setState({etape : this.props.route.params.etapeActuel});
-        this.setState({urlImage : this.props.route.params.urlImage});
+        this.setState({currentRally : this.props.route.params.currentRally});
+        this.setState({currentImage : this.props.route.params.currentRally.state.image.urlImageEtape});
     }
   }
 
-
-
   render() {
-
-    //this.sensors.getCurrentPosition();
     this.sensors.getAngle();
     this.sensors.getCompass();
-
-    //CheckForAlign
-    // if(this.state.etape != undefined){
-    //     console.log(this.sensors.position.longitude.toFixed(5));
-    //     console.log(this.state.etape.longitudeEtape.toFixed(5));
-    // }
-
-    this.state.isAlign = isAlign()? true: false;
-
     return (
       <View style={styles.container}>
         <RNCamera
@@ -142,7 +136,7 @@ export default class SolveRallyScreen extends Component {
         >
         <Image
           style ={styles.imageToReproduce}
-          source={{uri: this.state.urlImage}}
+          source={{uri: this.state.currentImage}}
         />
           <TouchableOpacity
             onPress={this.takePicture.bind(this)}
@@ -158,12 +152,14 @@ export default class SolveRallyScreen extends Component {
   takePicture = async () => {
     if (this.camera) {
       const options = { quality: 0.5, base64: true };
-      console.log(this.sensors);
-      console.log(this.state.etape);
-      //const data = await this.camera.takePictureAsync(options);
-      //this.sendData(data);
+      this.waitForUpdate();
     }
   };
+  waitForUpdate= ()=>{
+    setTimeout(() => {
+      isAlign();
+      }, 3000);
+  }
 
   sendData = async (data, addComplete) => {
     if (this.camera) {

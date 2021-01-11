@@ -46,9 +46,9 @@ import {
           },
           // Android only
           androidProvider: "auto",
-          interval: 1000, // Milliseconds
-          fastestInterval: 1000, // Milliseconds
-          maxWaitTime:1000, // Milliseconds
+          interval: 0, // Milliseconds
+          fastestInterval: 0, // Milliseconds
+          maxWaitTime:0, // Milliseconds
           // iOS Only
           activityType: "other",
           allowsBackgroundLocationUpdates: false,
@@ -65,11 +65,6 @@ import {
       }
     
     getCurrentPosition() {
-      console.log("test");
-    
-
-
-
       //   Geolocation.getCurrentPosition((pos) => {
       //       const crd = pos.coords;
       //       this.position.latitude = crd.latitude;

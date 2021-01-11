@@ -5,7 +5,7 @@ import MapView, { PROVIDER_GOOGLE, Marker, Circle } from "react-native-maps";
 import Sensors from "../logics/PhoneSensors";
 import { IconButton } from "../components/IconButton";
 import { getRally } from "../api/RallyApi";
-import { getImage } from "../api/EtapeApi";
+import CurrentRally from "../logics/CurrentRally";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -68,17 +68,13 @@ export default class MapScreen extends Component {
     super(props);
     this.sensors = new Sensors();
     this.state = {
+      currentRally : new CurrentRally(),
       user: auth().currentUser,
-      selectedRally: null,
-      urlImageEtape : null,
-      isRallyInProgress: false,
-      etapeActuel: 0,
     };
     recuperRally = recuperRally.bind(this);
-    lancerLeRally = lancerLeRally.bind(this);
+    bouttonLancerLeRally = bouttonLancerLeRally.bind(this);
     quitterLeRally = quitterLeRally.bind(this);
     MapRender = MapRender.bind(this);
-    getUrlImage = getUrlImage.bind(this);
 
     AfficherRallys = AfficherRallys.bind(this);
     AfficherEtape = AfficherEtape.bind(this);
@@ -91,6 +87,20 @@ export default class MapScreen extends Component {
     const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) =>
       this.setState({ x: x, y: y, z: z })
     );
+
+    if(this.props.route.params != null){
+      if(this.props.route.params.currentRally != null){
+        console.log("test2");
+        this.setState({currentRally : this.props.route.params.currentRally});
+      }else{
+        console.log("test");
+        this.setState({currentRally : new CurrentRally()});
+      } 
+  }else{
+    console.log("test1");
+    this.setState({currentRally : new CurrentRally()});
+    console.log(this.state.currentRally.isRallyInProgress());
+  } 
   }
 
   remap() {
@@ -120,7 +130,7 @@ export default class MapScreen extends Component {
       ? (mapProps.region = this.region)
       : (mapProps.region = undefined);
 
-    !this.state.isRallyInProgress
+    !this.state.currentRally.isRallyInProgress()
       ? (mapProps.onRegionChangeComplete = (region) => recuperRally(region))
       : (mapProps.onRegionChangeComplete = (region) => null);
     return (
@@ -141,19 +151,16 @@ export default class MapScreen extends Component {
 }
 
 function AfficherEtape() {
-  if (this.state.isRallyInProgress == true) {
-    let etapes = this.state.selectedRally.lesEtapes;
-    let currentEtape = etapes[this.state.etapeActuel];
-
+  if (this.state.currentRally.isRallyInProgress() == true) {
     return (
       <Fragment>
         <Circle
           key={(
-            currentEtape.latitudeEtape + currentEtape.longitudeEtape
+            this.state.currentRally.getCurrentEtapeCoord().latitudeEtape + this.state.currentRally.getCurrentEtapeCoord().longitudeEtape
           ).toString()}
           center={{
-            latitude: currentEtape.latitudeEtape,
-            longitude: currentEtape.longitudeEtape,
+            latitude: this.state.currentRally.getCurrentEtapeCoord().latitudeEtape,
+            longitude: this.state.currentRally.getCurrentEtapeCoord().longitudeEtape,
           }}
           radius={500}
           strokeWidth={1}
@@ -197,44 +204,37 @@ function Menu() {
   return (
     <Fragment>
       <View style={styles.rallyWindow}>
-        <Text>{this.state.selectedRally.nomRally}</Text>
+        <Text>{this.state.currentRally.getCurrentRally().nomRally}</Text>
         <Text>
-          Nombre d'etape : {this.state.selectedRally.lesEtapes.length}
+          Nombre d'etape : {this.state.currentRally.getCurrentRally().lesEtapes.length}
         </Text>
         <Image
           style ={styles.image}
-          source={{uri: this.state.urlImageEtape}}
+          source={{uri: this.state.currentRally.state.image.urlImageEtape}}
         />
         <FormButton
           title={"Faire se Rally"}
           onPress={() => {
-            lancerLeRally();
+            bouttonLancerLeRally();
           }}
         />
       </View>
     </Fragment>
   );
 }
-function getUrlImage(rally){
-  getImage(rally.lesEtapes[0].nomImage).then((urlImage) => {
-    if (urlImage != undefined && urlImage != null) {
-      this.setState({urlImageEtape:urlImage});
-    }
-  });
-}
 function RallyButton() {
-  if (this.state.isRallyInProgress == true) {
+  if (this.state.currentRally.isRallyInProgress() == true) {
     return (
       <Fragment>
        <Image
           style ={styles.imageToReproduce}
-          source={{uri: this.state.urlImageEtape}}
+          source={{uri: this.state.currentRally.state.image.urlImageEtape}}
         />
         <View style={styles.groupRight}>
           <IconButton
             style={styles.input}
             sourceImage={require("../../assets/icons/Photo.png")}
-            onPress={() => this.props.navigation.push("SolveRallyScreen",{etapeActuel : this.state.selectedRally.lesEtapes[this.state.etapeActuel],urlImage: this.state.urlImageEtape})}
+            onPress={() => this.props.navigation.push("SolveRallyScreen",{currentRally : this.state.currentRally})}
           />
           <IconButton
             style={styles.input}
@@ -253,17 +253,18 @@ function RallyButton() {
   return <Fragment></Fragment>;
 }
 
-function lancerLeRally() {
+function bouttonLancerLeRally() {
+  this.state.currentRally.lancerLeRally();
   isMarkerSelected = false;
-  this.setState({ etapeActuel: 0 });
-  this.setState({ isRallyInProgress: true });
-  lesRallys = [];
 }
+
 function quitterLeRally() {
-  isMarkerSelected = false;
-  this.setState({ isRallyInProgress: false });
+  this.state.currentRally.quitterLeRally();
   recuperRally(this.region);
 }
+
+
+
 function recuperRally(region) {
   mapView.getCamera().then((cameraValues) => {
     getRally(region, cameraValues.zoom).then((rallys) => {
@@ -276,7 +277,7 @@ function recuperRally(region) {
 
 function AfficherRallys() {
   let keyToAdd = 0;
-  if (lesRallys != null) {
+  if (lesRallys != null && !this.state.currentRally.isRallyInProgress()) {
     return (
       <Fragment>
         {lesRallys.map((rally, index) => {
@@ -285,9 +286,9 @@ function AfficherRallys() {
             <Marker
               key={keyToAdd}
               onPress={() => {
+                this.state.currentRally.updateRally(rally);
                 isMarkerSelected = true;
-                this.setState({ selectedRally: rally });
-                getUrlImage(rally);
+                // this.setState({ selectedRally: rally });
               }}
               coordinate={{
                 latitude: rally.latitudeStartRally,
@@ -358,7 +359,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     position: "absolute",
     backgroundColor: "rgba(224, 222, 222,1)",
-    height: 200,
+    height: 300,
     width: 300,
     bottom: 0,
   },
