@@ -1,9 +1,11 @@
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity,Animated } from "react-native";
 import React, { Component } from "react";
 import auth from "@react-native-firebase/auth";
 import { RNCamera, FaceDetector } from "react-native-camera";
 
 import Sensors from "../logics/PhoneSensors";
+import Etape from "../class/Etape";
+import EtapeLogics from "../logics/EtapeLogic";
 
 import {
   accelerometer,
@@ -16,10 +18,16 @@ export default class CaptureScreen extends Component {
     //constructor to set default state
     super(props);
     this.sensors = new Sensors();
+    this.etapeLogic = new EtapeLogics();
     this.state = {
       user: auth().currentUser,
+      lastPos: null,
+      warningText : "",
+      fadeAnimation: new Animated.Value(0),
     };
+    getData = getData.bind(this);
   }
+
   componentDidMount() {
     const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) =>
       this.setState({ x: x, y: y, z: z })
@@ -27,6 +35,8 @@ export default class CaptureScreen extends Component {
     if(this.props.route.params != null){
       this.state.etape = this.props.route.params.etapeValide;
     }
+    this.state.lastPos = null;
+
   }
   render() {
     this.sensors.getCurrentPosition();
@@ -58,6 +68,7 @@ export default class CaptureScreen extends Component {
           //   console.log(barcodes);
           // }}
         />
+         <Text style={{opacity: this.state.fadeAnimation},styles.warningText}>{this.state.warningText}</Text>
         <View
           style={{ flex: 0, flexDirection: "row", justifyContent: "center" }}
         >
@@ -79,21 +90,45 @@ export default class CaptureScreen extends Component {
       this.sendData(data);
     }
   };
-
+  resetWarning(){
+    setTimeout(() => {
+      this.setState({warningText : ""});
+    },8000)
+  }
   sendData = async (data, addComplete) => {
     if (this.camera) {
-      this.state.etape.nomImage = data.uri;
-      this.state.etape.latitudeEtape = this.sensors.position.latitude;
-      this.state.etape.longitudeEtape = this.sensors.position.longitude;
-      this.state.etape.degreeEtape = this.sensors.Degree;
-      this.state.etape.angleXEtape = this.sensors.AngleX;
-      this.state.etape.angleYEtape = this.sensors.AngleY;
-      this.state.etape.angleZEtape = this.sensors.AngleZ;
-      //addEtape(this.state.etape);
-      console.log(this.state.etape);
-      this.props.navigation.push("ValideEtape", {etapeValue: this.state.etape ,estNouveau : false});
+      this.setState({warningText : "Ne pas bouger pendant la photo"});
+      this.resetWarning();
+      setTimeout(() => {
+        let lastEtape = getData(data);
+        setTimeout(() => {
+          let currentEtape = getData(data);
+          if(this.etapeLogic.compareEtape(lastEtape,currentEtape)){
+            this.props.navigation.push("ValideEtape", {etapeValue: currentEtape ,estNouveau : false});
+          }else{
+            this.setState({warningText : "Vous avez bouger pendant la photo"});
+            this.resetWarning();
+          }
+          
+        }, 6000);
+      }, 6000);
+    
     }
   };
+}
+
+function getData(data){
+  let etape = new Etape();
+
+  etape.nomImage = data.uri;
+  etape.latitudeEtape = this.sensors.position.latitude;
+  etape.longitudeEtape = this.sensors.position.longitude;
+  etape.degreeEtape = this.sensors.Degree;
+  etape.angleXEtape = this.sensors.AngleX;
+  etape.angleYEtape = this.sensors.AngleY;
+  etape.angleZEtape = this.sensors.AngleZ;
+
+  return(etape);
 }
 const styles = StyleSheet.create({
   container: {
@@ -108,11 +143,19 @@ const styles = StyleSheet.create({
   },
   capture: {
     flex: 0,
+    position: "absolute",
     backgroundColor: "#fff",
     borderRadius: 5,
     padding: 15,
     paddingHorizontal: 20,
     alignSelf: "center",
-    margin: 20,
+    bottom: 10,
+  },
+  warningText: {
+    flex: 0,
+    position: "absolute",
+    color: "white",
+    alignSelf: "center",
+    top: 50,
   },
 });

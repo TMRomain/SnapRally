@@ -49,7 +49,6 @@ export function uploadImage(imageUri){
     const ext = imageUri.split('.').pop(); // Extract image extension
     const filename = `${uuid.v1()}.${ext}`; // Generate unique name
     let uploading = true
-
     console.log(imageUri);
     let reference = storage().ref("/etapes/images/"+filename);         // 2
     let task = reference.putFile(imageUri);          // 3

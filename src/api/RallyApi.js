@@ -38,6 +38,8 @@ export function CreateRally(nomRally,lesEtapes){
             rally.latitudeStartRally = getRandomFloat(item.latitudeEtape-distanceToSpawn,item.latitudeEtape+distanceToSpawn);
             rally.longitudeStartRally = getRandomFloat(item.longitudeEtape-distanceToSpawn,item.longitudeEtape+distanceToSpawn);
         }
+        item.latitudeStartEtape = getRandomFloat(item.latitudeEtape-distanceToSpawn,item.latitudeEtape+distanceToSpawn);
+        item.longitudeStartEtape = getRandomFloat(item.longitudeEtape-distanceToSpawn,item.longitudeEtape+distanceToSpawn);
         let imageName = uploadImage(item.nomImage);
         lesEtapes[index].nomImage = imageName;
         rally.lesEtapes[index] = item;

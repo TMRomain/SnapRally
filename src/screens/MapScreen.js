@@ -87,26 +87,33 @@ export default class MapScreen extends Component {
     const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) =>
       this.setState({ x: x, y: y, z: z })
     );
-
-    if(this.props.route.params != null){
-      if(this.props.route.params.currentRally != null){
-        console.log("test2");
-        this.setState({currentRally : this.props.route.params.currentRally});
-      }else{
-        console.log("test");
-        this.setState({currentRally : new CurrentRally()});
-      } 
-  }else{
-    console.log("test1");
-    this.setState({currentRally : new CurrentRally()});
-    console.log(this.state.currentRally.isRallyInProgress());
-  } 
+    //Listen for Screen Load
+    this._unsubscribe = this.props.navigation.addListener('focus', () => {
+      this.setState({sensors:null});
+      this.setState({sensors:new Sensors()});
+      if(this.props.route.params != null){
+        if(this.props.route.params.currentRally != null){
+          this.setState({currentRally : this.props.route.params.currentRally});
+          if(this.state.currentRally.isRallyOver()){
+            console.log("Le Rally et terminer")
+            this.state.currentRally.quitterLeRally();
+          };
+          this.state.currentRally.updateEtape(this.state.currentRally.state.etapeActuel);
+        }else{
+          this.setState({currentRally : new CurrentRally()});
+        } 
+    }else{
+      this.setState({currentRally : new CurrentRally()});
+    } 
+    });
   }
 
   remap() {
     setTimeout(() => {
-      mapView.animateToRegion(this.region, 500);
-    }, 1000);
+      if(mapView!= null &&mapView!= undefined){
+        mapView.animateToRegion(this.region, 500);
+      }
+    }, 2000);
   }
 
   render() {
@@ -119,7 +126,8 @@ export default class MapScreen extends Component {
       latitudeDelta: 0.015,
       longitudeDelta: 0.0121,
     };
-
+    //console.log("From render Progress : "+this.state.currentRally.isRallyInProgress());
+    //console.log("From render Active : "+ this.state.currentRally.state.isRallyActive);
     //Change map props when changin lock state
     this.icon = lockOnUser
       ? require("../../assets/icons/Lock.png")
@@ -129,7 +137,7 @@ export default class MapScreen extends Component {
     lockOnUser
       ? (mapProps.region = this.region)
       : (mapProps.region = undefined);
-
+  
     !this.state.currentRally.isRallyInProgress()
       ? (mapProps.onRegionChangeComplete = (region) => recuperRally(region))
       : (mapProps.onRegionChangeComplete = (region) => null);
@@ -151,7 +159,7 @@ export default class MapScreen extends Component {
 }
 
 function AfficherEtape() {
-  if (this.state.currentRally.isRallyInProgress() == true) {
+  if (this.state.currentRally.isRallyInProgress() == true && this.state.currentRally.getCurrentEtape() != undefined) {
     return (
       <Fragment>
         <Circle
@@ -180,7 +188,7 @@ function Menu() {
         <IconButton
           style={styles.mainButton}
           sourceImage={require("../../assets/icons/Menu.png")}
-          onPress={() => recuperRally(this.region)}
+          onPress={() => console.log(this.state.currentRally.state.rallyActuel)}
         />
         <Text style={styles.textOver}>
           Parcours autour de vous {this.state.user.displayName}
@@ -223,7 +231,7 @@ function Menu() {
   );
 }
 function RallyButton() {
-  if (this.state.currentRally.isRallyInProgress() == true) {
+  if (this.state.currentRally.isRallyInProgress() == true && this.state.currentRally.getCurrentEtape() != undefined) {
     return (
       <Fragment>
        <Image
@@ -234,7 +242,7 @@ function RallyButton() {
           <IconButton
             style={styles.input}
             sourceImage={require("../../assets/icons/Photo.png")}
-            onPress={() => this.props.navigation.push("SolveRallyScreen",{currentRally : this.state.currentRally})}
+            onPress={() => this.props.navigation.navigate("SolveRallyScreen",{currentRally : this.state.currentRally})}
           />
           <IconButton
             style={styles.input}

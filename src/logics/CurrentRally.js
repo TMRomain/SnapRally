@@ -10,6 +10,7 @@ export default class CurrentRally{
             image: {
                 urlImageEtape:null,
                 imageRallyLink: null,
+                etape : null,
             }
         };
     }
@@ -21,15 +22,32 @@ export default class CurrentRally{
             this.getUrlImage(0);
         } 
     }
+    updateEtape(numEtape){
+        this.getUrlImage(numEtape);
+    }
     lancerLeRally() {
+        console.log("Debut Rally");
         this.state.isRallyActive =true;
+        this.state.etapeActuel =0;
     }
     quitterLeRally() {
-        this.state.isRallyActive =false;
+        console.log("Fin Rally");
+        this.state.isRallyActive = false;
+        console.log(this.state.isRallyActive);
+    }
+    isRallyOver() {
+        console.log(this.state.rallyActuel);
+        if(this.state.etapeActuel >= this.state.rallyActuel.lesEtapes.length){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     isRallyInProgress(){
         return(this.state.isRallyActive);
+        //return false;
     }
     getCurrentRally() {
         return(this.state.rallyActuel);
@@ -44,13 +62,15 @@ export default class CurrentRally{
     }
 
     async getUrlImage(numEtape){
-        if(numEtape == this.state.etapeActuel && this.state.rallyActuel != null && this.state.rallyActuel.linkRally == this.state.image.imageRallyLink &&this.state.image.urlImageEtape!=null){
+    
+        if(this.state.image.etape == numEtape && this.state.rallyActuel != null && this.state.rallyActuel.linkRally == this.state.image.imageRallyLink &&this.state.image.urlImageEtape!=null){
             return(this.state.image.urlImageEtape);
         }
         await getImage(this.state.rallyActuel.lesEtapes[numEtape].nomImage).then((urlImage) => {
             if (urlImage != undefined && urlImage != null) {
                 this.state.image.urlImageEtape = urlImage;
                 this.state.image.imageRallyLink = this.state.rallyActuel.linkRally;
+                this.state.image.etape = numEtape;
             }
         });
         return(this.state.image.urlImageEtape);

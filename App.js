@@ -60,6 +60,7 @@ export default class App extends Component {
   constructor(props) {  
     //constructor to set default state  
     super(props);  
+    test = "Salut";
 }  
   render() {
     return <LoginApp />;
