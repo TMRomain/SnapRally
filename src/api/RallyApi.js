@@ -16,15 +16,15 @@ let distanceToVerify = 0.20;
 
 export function AddRally(rallyData){
     database()
-    .ref('Rally/')
-    .push({
+    .ref('Rally/'+rallyData.linkRally)
+    .set({
         rallyData
     })
     .then(() => console.log('Rally Upload sur le serveur'))
     .catch((error) => console.log('Erreur serveur' + error));
 }
 
-export function CreateRally(nomRally,lesEtapes){
+export function CreateRally(nomRally,lesEtapes,difficulty,uid){
     let randUuid = uuid.v1(); 
     let rally = new Rally();
     let numberOfEtape = 0;
@@ -47,6 +47,8 @@ export function CreateRally(nomRally,lesEtapes){
         numberOfEtape++;
     });
     rally.numberOfEtape = numberOfEtape;
+    rally.difficulty = difficulty;
+    rally.user = uid;
     AddRally(rally);
     lesEtapes = [];
     rally = null;
@@ -58,17 +60,17 @@ function getRandomFloat(min, max) {
   
 
 export async function getRally(region,zoomValue) {
+    
     let rallys;
     let rallysValider = [];
     let rallyArrayPos = 0;
     let distanceMinestZoom = distanceToVerify - (zoomValue/80);
-    await database().ref().once('value').then(snapshot => {
+    await database().ref('Rally/').once('value').then(snapshot => {
         rallys = snapshot.val();
     });
     if(rallys != null &&rallys != undefined){
     rallys = Object.values(Object.values(rallys)[0]);
     rallys.map((rally, index) => {
-        rally = Object.values(rally)[0];
         let estimateLatMax = region.latitude + distanceMinestZoom;
         let estimateLatMin = region.latitude - distanceMinestZoom;
         let estimateLongMax = region.longitude + distanceMinestZoom;
@@ -80,6 +82,7 @@ export async function getRally(region,zoomValue) {
             }
         }
     });}
+    
     return(rallysValider);
     // database().ref().once('value').then(snapshot => {
     //     rallys = snapshot.val();
@@ -113,4 +116,14 @@ export async function getRally(region,zoomValue) {
     //         return rallyInRegion;
     //     }
     // });
+}
+export async function getRallyFromLink(linkRally){
+    let rally = null;
+    await database().ref('Rally/').once('value').then(snapshot => {
+            rally = snapshot.val();
+        });
+    if(rally!= null){
+        rally = Object.values(Object.values(rally)[0])[0];
+        return (rally); 
+    }
 }

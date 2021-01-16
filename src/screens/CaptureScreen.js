@@ -100,9 +100,9 @@ export default class CaptureScreen extends Component {
       this.setState({warningText : "Ne pas bouger pendant la photo"});
       this.resetWarning();
       setTimeout(() => {
-        let lastEtape = getData(data);
+        let lastEtape = getData(data,this.sensors);
         setTimeout(() => {
-          let currentEtape = getData(data);
+          let currentEtape = getData(data,this.sensors);
           if(this.etapeLogic.compareEtape(lastEtape,currentEtape)){
             this.props.navigation.push("ValideEtape", {etapeValue: currentEtape ,estNouveau : false});
           }else{
@@ -110,23 +110,23 @@ export default class CaptureScreen extends Component {
             this.resetWarning();
           }
           
-        }, 6000);
-      }, 6000);
+        }, 10000);
+      }, 10000);
     
     }
   };
 }
 
-function getData(data){
+function getData(data,sensor){
   let etape = new Etape();
 
   etape.nomImage = data.uri;
-  etape.latitudeEtape = this.sensors.position.latitude;
-  etape.longitudeEtape = this.sensors.position.longitude;
-  etape.degreeEtape = this.sensors.Degree;
-  etape.angleXEtape = this.sensors.AngleX;
-  etape.angleYEtape = this.sensors.AngleY;
-  etape.angleZEtape = this.sensors.AngleZ;
+  etape.latitudeEtape = sensor.position.latitude;
+  etape.longitudeEtape = sensor.position.longitude;
+  etape.degreeEtape = sensor.Degree;
+  etape.angleXEtape = sensor.AngleX;
+  etape.angleYEtape = sensor.AngleY;
+  etape.angleZEtape = sensor.AngleZ;
 
   return(etape);
 }

@@ -5,7 +5,9 @@ import MapView, { PROVIDER_GOOGLE, Marker, Circle } from "react-native-maps";
 import Sensors from "../logics/PhoneSensors";
 import { IconButton } from "../components/IconButton";
 import { getRally } from "../api/RallyApi";
+import { UpdateUser } from "../api/UserApi";
 import CurrentRally from "../logics/CurrentRally";
+import Region from "../class/Region";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -16,7 +18,7 @@ import { FormButton } from "../components/FormButton";
 setUpdateIntervalForType(SensorTypes.accelerometer, 400);
 
 let lesRallys;
-let lockOnUser = false;
+let lockOnUser = true;
 let isMarkerSelected = false;
 let mapView;
 
@@ -37,6 +39,7 @@ function MapRender() {
         provider={PROVIDER_GOOGLE} // remove if not using Google Maps
         onPress={() => {
           isMarkerSelected = false;
+          this.setState({isMenuOpen:false});
         }}
         style={styles.map}
         minZoomLevel={13}
@@ -48,6 +51,7 @@ function MapRender() {
         <Marker
           onPress={() => {
             isMarkerSelected = false;
+            this.setState({isMenuOpen:false});
           }}
           coordinate={{
             latitude: this.sensors.position.latitude,
@@ -70,11 +74,15 @@ export default class MapScreen extends Component {
     this.state = {
       currentRally : new CurrentRally(),
       user: auth().currentUser,
+      isWinScreenOpen : false,
+      isMenuOpen : false,
     };
     recuperRally = recuperRally.bind(this);
     bouttonLancerLeRally = bouttonLancerLeRally.bind(this);
     quitterLeRally = quitterLeRally.bind(this);
     MapRender = MapRender.bind(this);
+    WinScreen = WinScreen.bind(this);
+    MainMenuButtons = MainMenuButtons.bind(this);
 
     AfficherRallys = AfficherRallys.bind(this);
     AfficherEtape = AfficherEtape.bind(this);
@@ -90,11 +98,15 @@ export default class MapScreen extends Component {
     //Listen for Screen Load
     this._unsubscribe = this.props.navigation.addListener('focus', () => {
       this.setState({sensors:null});
+      this.setState({isWinScreenOpen:false});
+      this.setState({isMenuOpen:false});
       this.setState({sensors:new Sensors()});
       if(this.props.route.params != null){
         if(this.props.route.params.currentRally != null){
           this.setState({currentRally : this.props.route.params.currentRally});
+          console.log(this.state.currentRally);
           if(this.state.currentRally.isRallyOver()){
+            this.setState({isWinScreenOpen:true});
             console.log("Le Rally et terminer")
             this.state.currentRally.quitterLeRally();
           };
@@ -153,11 +165,37 @@ export default class MapScreen extends Component {
           onPress={() => this.props.navigation.push("WelcomeScreen")}
         />
         <Menu />
+       <WinScreen />
       </View>
     );
   }
 }
-
+function WinScreen(){
+  if(this.state.currentRally.getCurrentRally() != null && this.state.isWinScreenOpen){
+    return(
+      <Fragment>
+      <View style={styles.winScreen}>
+      <Text>
+        Vous avez terminer le Rally {this.state.currentRally.getCurrentRally().nomRally}
+      </Text>
+      <Text>
+        + 150 point Rally
+      </Text>
+      <FormButton
+          style ={styles.confirmButton}
+          title={"Confirmer"}
+          onPress={() => {
+            UpdateUser(150,this.state.currentRally.getCurrentRally());
+            this.setState({isWinScreenOpen : false});
+            this.setState({currentRally : new CurrentRally()});
+          }}
+        />
+    </View>
+    </Fragment>
+    )
+  }
+  return(<Fragment></Fragment>)
+}
 function AfficherEtape() {
   if (this.state.currentRally.isRallyInProgress() == true && this.state.currentRally.getCurrentEtape() != undefined) {
     return (
@@ -167,8 +205,8 @@ function AfficherEtape() {
             this.state.currentRally.getCurrentEtapeCoord().latitudeEtape + this.state.currentRally.getCurrentEtapeCoord().longitudeEtape
           ).toString()}
           center={{
-            latitude: this.state.currentRally.getCurrentEtapeCoord().latitudeEtape,
-            longitude: this.state.currentRally.getCurrentEtapeCoord().longitudeEtape,
+            latitude: this.state.currentRally.getCurrentEtapeCoord().latitudeStartEtape,
+            longitude: this.state.currentRally.getCurrentEtapeCoord().longitudeStartEtape,
           }}
           radius={500}
           strokeWidth={1}
@@ -180,16 +218,49 @@ function AfficherEtape() {
   }
   return <Fragment></Fragment>;
 }
+function MainMenuButtons(){
+  if(this.state.isMenuOpen){
+    return(
+      <Fragment>
+        <IconButton
+      style={styles.leftMain}
+      sourceImage={require("../../assets/icons/Search.png")}
+      onPress={() => console.log("Menu")}
+      />
+      <IconButton
+      style={styles.middleMain}
+      sourceImage={require("../../assets/icons/Inventory.png")}
+      onPress={() => console.log("Menu")}
+      />
+      <IconButton
+      style={styles.rightMain}
+      sourceImage={require("../../assets/icons/Profile.png")}
+      onPress={() => this.props.navigation.navigate("ProfileScreen")}
+      />
+      <IconButton
+      style={styles.mainButtonActive}
+      sourceImage={require("../../assets/icons/Menu.png")}
+      onPress={() => this.setState({isMenuOpen: false})}
+      />
+      </Fragment>
+    )
+  }
 
+  return(
+    <Fragment>        
+      <IconButton
+      style={styles.mainButton}
+      sourceImage={require("../../assets/icons/Menu.png")}
+      onPress={() => this.setState({isMenuOpen: true})}
+      />
+    </Fragment>
+  )
+}
 function Menu() {
   if (!isMarkerSelected) {
     return (
       <Fragment>
-        <IconButton
-          style={styles.mainButton}
-          sourceImage={require("../../assets/icons/Menu.png")}
-          onPress={() => console.log(this.state.currentRally.state.rallyActuel)}
-        />
+      <MainMenuButtons />
         <Text style={styles.textOver}>
           Parcours autour de vous {this.state.user.displayName}
         </Text>
@@ -231,7 +302,12 @@ function Menu() {
   );
 }
 function RallyButton() {
+  
   if (this.state.currentRally.isRallyInProgress() == true && this.state.currentRally.getCurrentEtape() != undefined) {
+    let currentEtape = this.state.currentRally.getCurrentEtape();
+    let regionEtape = new Region();
+    regionEtape.latitude = currentEtape.latitudeStartEtape;
+    regionEtape.longitude = currentEtape.longitudeStartEtape;
     return (
       <Fragment>
        <Image
@@ -247,7 +323,7 @@ function RallyButton() {
           <IconButton
             style={styles.input}
             sourceImage={require("../../assets/icons/positionMenu.png")}
-            onPress={() => console.log("Zoom sur la premiere Etape")}
+            onPress={() => mapView.animateToRegion(regionEtape, 2000)}
           />
           <IconButton
             style={styles.input}
@@ -365,6 +441,7 @@ const styles = StyleSheet.create({
   rallyWindow: {
     alignSelf: "center",
     alignContent: "center",
+    alignItems:"center",
     position: "absolute",
     backgroundColor: "rgba(224, 222, 222,1)",
     height: 300,
@@ -380,5 +457,51 @@ const styles = StyleSheet.create({
     width: 100,
     bottom: 300, 
     left: 250, 
+  },winScreen:{
+    alignSelf: "center",
+    alignContent: "center",
+    alignItems:"center",
+    position: "absolute",
+    backgroundColor: "rgba(224, 222, 222,1)",
+    height: 300,
+    width: 300,
+    top :Dimensions.get("window").height/3,
+  }, 
+  mainButtonActive: {
+    position: "absolute",
+    alignSelf: "center",
+    backgroundColor: "rgba(224, 222, 222,1)",
+    bottom: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 40,
+  },
+  middleMain:{
+    position: "absolute",
+    alignSelf: "center",
+    bottom: 150,
+    width: 45,
+    height: 45,
+    borderRadius: 40,
+  },
+  leftMain:{
+    position: "absolute",
+    alignSelf: "center",
+    bottom: 100,
+    left:40,
+    width: 45,
+    height: 45,
+    borderRadius: 40,
+  },rightMain:{
+    position: "absolute",
+    alignSelf: "center",
+    right:40,
+    bottom: 100,
+    width: 45,
+    height: 45,
+    borderRadius: 40,
+  },
+  confirmButton:{
+    bottom: 10,
   },
 });

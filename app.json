@@ -21,7 +21,6 @@
       "**/*"
     ],
     "ios": {
-      "package": "com.snaprally",
       "supportsTablet": true,
       "bundleIdentifier": "com.snaprally"
     },

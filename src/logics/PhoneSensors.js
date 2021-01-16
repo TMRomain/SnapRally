@@ -57,11 +57,18 @@ import {
           pausesLocationUpdatesAutomatically: false,
           showsBackgroundLocationIndicator: false,
       })
-
-      RNLocation.subscribeToLocationUpdates(locations => {
-        this.position.latitude = locations[0].latitude;
-        this.position.longitude = locations[0].longitude;
-      });
+      RNLocation.requestPermission({
+        ios: "whenInUse",
+        android: {
+          detail: "coarse"
+        }
+      }).then(granted => {
+          if (granted) {
+            RNLocation.subscribeToLocationUpdates(locations => {
+              this.position.latitude = locations[0].latitude;
+              this.position.longitude = locations[0].longitude;
+            });
+          }})
       }
     
     getCurrentPosition() {

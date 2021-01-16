@@ -8,6 +8,8 @@ import { FormButton } from "../components/FormButton";
 import { TextButton } from "../components/TextButton";
 import { Error } from "../components/Error";
 import auth from "@react-native-firebase/auth";
+import database from '@react-native-firebase/database';
+import User from "../class/User";
 
 export default class LoginPage extends Component {
   constructor(props) {
@@ -26,6 +28,7 @@ export default class LoginPage extends Component {
     let email = this.state.email;
     let password = this.state.password;
     let username = this.state.username;
+    let codeInscription = this.state.codeInscription;
     let confirmedPassword = this.state.confirmedPassword;
     var user = null;
     console.log();
@@ -61,6 +64,7 @@ export default class LoginPage extends Component {
             })
             .then(() => {
               user.sendEmailVerification();
+              createDatabaseUser(user,username,codeInscription);
             });
         })
         .catch((error) => {
@@ -121,6 +125,14 @@ export default class LoginPage extends Component {
               this.setState({ confirmedPassword })
             }
           />
+          <Input
+            placeholder="Code d'inscription * "
+            style={styles.input}
+            value={this.state.codeInscription}
+            onChangeText={(codeInscription) =>
+              this.setState({codeInscription})
+            }
+          />
           <FormButton title={"Valider"} onPress={() => this.createUser()} />
           <TextButton
             title={"Retourner a la connexion"}
@@ -131,7 +143,24 @@ export default class LoginPage extends Component {
     );
   }
 }
-
+function createDatabaseUser(user,pseudo,codeInscription){
+  let uid = user.uid;
+  let isPremium = false;
+  if(codeInscription == "BetaTestSnapRally"){
+    isPremium= true;
+  }
+  let exp = 0;
+  database()
+  .ref('Users/'+uid)
+  .set({
+    pseudo,
+    uid,
+    isPremium,
+    exp
+  })
+  .then(() => console.log('User added'))
+  .catch((error) => console.log('Erreur serveur' + error));
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

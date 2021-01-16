@@ -6,6 +6,7 @@ import { RNCamera, FaceDetector } from "react-native-camera";
 import Sensors from "../logics/PhoneSensors";
 import Etape from "../class/Etape";
 import EtapeLogics from "../logics/EtapeLogic";
+import {IconButton} from "../components/IconButton";
 import {
   accelerometer,
   setUpdateIntervalForType,
@@ -108,12 +109,12 @@ export default class SolveRallyScreen extends Component {
         this.setState({currentImage : this.props.route.params.currentRally.state.image.urlImageEtape});
     }
     this.setState({sensorsCaptures:null});
+    console.log("test");
     this.setState({sensorsCaptures:new Sensors()});
     this.sensorsCaptures.randomNumber = Math.random();
     });
     
   }
-
   render() {
     this.sensorsCaptures.getAngle();
     this.sensorsCaptures.getCompass();
@@ -145,6 +146,8 @@ export default class SolveRallyScreen extends Component {
         />
         <DebugInfo />
         <Text style={{opacity: this.state.fadeAnimation},styles.warningText}>{this.state.warningText}</Text>
+        <IconButton style = {styles.closeButton} sourceImage={require('../../assets/icons/close.png')} 
+         onPress={() =>  this.props.navigation.navigate("MapScreen",{currentRally : this.state.currentRally})}/>
         <View
           style={{ flex: 0, flexDirection: "row", justifyContent: "center" }}
         >
@@ -152,6 +155,7 @@ export default class SolveRallyScreen extends Component {
           style ={styles.imageToReproduce}
           source={{uri: this.state.currentImage}}
         />
+        
           <TouchableOpacity
             onPress={this.takePicture.bind(this)}
             style={styles.capture}
@@ -173,37 +177,39 @@ export default class SolveRallyScreen extends Component {
   resetWarning(){
     setTimeout(() => {
       this.setState({warningText : ""});
-    },8000)
+    },10000)
   }
   sendData = async (data, addComplete) => {
+    
     if (this.camera) {
       this.setState({warningText : "Ne pas bouger pendant la photo"});
       this.resetWarning();
       setTimeout(() => {
-        let etape = getData(data);
+        let etape = getData(data,this.sensorsCaptures);
         if(this.etapeLogic.compareEtape(etape,this.state.currentRally.getCurrentEtape())){
           //Reussite du Rally
           this.state.currentRally.state.etapeActuel++;
           this.props.navigation.navigate("MapScreen",{currentRally:this.state.currentRally})
         }else{
-          console.log("Mauvaise Photo");
+          this.setState({warningText : "Mauvaise Photo"});
+          this.resetWarning();
         }
-      }, 7000);
+      }, 10000);
     
     }
   };
 }
 
-function getData(data){
+function getData(data,sensor){
   let etape = new Etape();
 
   etape.nomImage = data.uri;
-  etape.latitudeEtape = this.sensorsCaptures.position.latitude;
-  etape.longitudeEtape = this.sensorsCaptures.position.longitude;
-  etape.degreeEtape = this.sensorsCaptures.Degree;
-  etape.angleXEtape = this.sensorsCaptures.AngleX;
-  etape.angleYEtape = this.sensorsCaptures.AngleY;
-  etape.angleZEtape = this.sensorsCaptures.AngleZ;
+  etape.latitudeEtape = sensor.position.latitude;
+  etape.longitudeEtape = sensor.position.longitude;
+  etape.degreeEtape = sensor.Degree;
+  etape.angleXEtape = sensor.AngleX;
+  etape.angleYEtape = sensor.AngleY;
+  etape.angleZEtape = sensor.AngleZ;
 
   return(etape);
 }
@@ -249,5 +255,9 @@ const styles = StyleSheet.create({
   color: "white",
   alignSelf: "center",
   top: 50,
+},closeButton:{
+  position: "absolute",
+  top: 20,
+  right: 10, 
 },
 });

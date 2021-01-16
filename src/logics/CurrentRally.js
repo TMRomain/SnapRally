@@ -32,12 +32,12 @@ export default class CurrentRally{
     }
     quitterLeRally() {
         console.log("Fin Rally");
+        this.state.etapeActuel =0;
         this.state.isRallyActive = false;
         console.log(this.state.isRallyActive);
     }
     isRallyOver() {
-        console.log(this.state.rallyActuel);
-        if(this.state.etapeActuel >= this.state.rallyActuel.lesEtapes.length){
+        if(this.state.rallyActuel!= null&&this.state.etapeActuel >= this.state.rallyActuel.lesEtapes.length){
             return true;
         }
         else{

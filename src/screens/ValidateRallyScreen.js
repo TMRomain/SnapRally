@@ -42,14 +42,14 @@ export default class ValidateRallyScreen extends Component {
             value={this.state.nomRally}
             onChangeText={(nomRally) => this.setState({ nomRally })}
           />
-          <View style={styles.align}>
+          {/* <View style={styles.align}>
             <CheckBox
               disabled={false}
               value={isAgainstTime}
               onValueChange={(newValue) => (isAgainstTime = newValue)}
             />
             <Text> Course Contre la montre </Text>
-          </View>
+          </View> */}
           <View style={styles.align}>
           <Picker
             selectedValue={this.state.difficulty}
@@ -76,7 +76,7 @@ export default class ValidateRallyScreen extends Component {
 }
 
 function ValiderRally(nomRally) {
-  CreateRally(nomRally,lesEtapes);
+  CreateRally(nomRally,lesEtapes,this.state.difficulty,this.state.user.uid);
   this.props.navigation.push("WelcomeScreen");
 }
 

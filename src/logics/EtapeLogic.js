@@ -7,6 +7,7 @@ export default class EtapeLogic{
       }
 
     compareEtape(firstEtape,SecondEtape){
+        console.log(firstEtape);
         if(!this.isInRange(firstEtape.longitudeEtape,SecondEtape.longitudeEtape,this.comparationTresholdPos)){
             console.log("Mauvaise Longitude");            
             console.log(firstEtape.longitudeEtape);

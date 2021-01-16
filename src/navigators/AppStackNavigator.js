@@ -8,6 +8,7 @@ import CaptureScreen from "../screens/CaptureScreen";
 import ValideEtape from "../screens/ValideEtape";
 import MapScreen from "../screens/MapScreen";
 import ValidateRallyScreen from "../screens/ValidateRallyScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 import SolveRallyScreen from "../screens/SolveRallyScreen";
 //Library
 import React from "react";
@@ -26,6 +27,7 @@ export function AppStackNavigator() {
       <AppStack.Screen name="WelcomeScreen" component={WelcomeScreen} />
       <AppStack.Screen name="PlayScreen" component={PlayScreen} />
       <AppStack.Screen name="PositionScreen" component={PositionScreen} />
+      <AppStack.Screen name="ProfileScreen" component={ProfileScreen} />
       <AppStack.Screen name="ParcoursScreen" component={ParcoursScreen} />
       <AppStack.Screen name="CreateRallyScreen" component={CreateRallyScreen} />
       <AppStack.Screen name="CaptureScreen" component={CaptureScreen} />
