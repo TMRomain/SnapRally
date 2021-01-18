@@ -60,7 +60,7 @@ import {
       RNLocation.requestPermission({
         ios: "whenInUse",
         android: {
-          detail: "coarse"
+          detail: "fine"
         }
       }).then(granted => {
           if (granted) {
@@ -71,20 +71,16 @@ import {
           }})
       }
     
-    getCurrentPosition() {
-      //   Geolocation.getCurrentPosition((pos) => {
-      //       const crd = pos.coords;
-      //       this.position.latitude = crd.latitude;
-      //       this.position.longitude = crd.longitude;
-      //       this.position.latitudeDelta = 0.0421;
-      //       this.position.longitudeDelta = 0.0421;      
-      //       console.log(this.position);
-      //     },
-      //     (error) => {
-      //         console.log(error.code, error.message);
-      //     },
-      //     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      // );
+    getCurrentPosition(callback) {
+        Geolocation.getCurrentPosition(
+          //Will give you the current location
+          (position) => {
+            callback(position);
+           //return position;
+           }, (error) => alert(error.message), { 
+             enableHighAccuracy: true, timeout: 10000, maximumAge: 100
+           }
+        );
     }
 
     getCompass(){

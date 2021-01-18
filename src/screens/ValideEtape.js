@@ -21,7 +21,7 @@ function CheckForImage(){
     return(
       <Fragment>
         <Image source={source} style={styles.image} />
-        <FormButton title={"Valider"} style = {styles.input} onPress={() => Valider()}/>
+        <FormButton title={"Valider étape"} style = {styles.input} onPress={() => Valider()}/>
         <FormButton title={"Prendre une autre photo"} style = {styles.input} onPress={() => PrendreUnePhoto()}/>
       </Fragment>
     )
@@ -42,7 +42,6 @@ export default class ValideEtape extends Component {
       user: getUser(),
       error:"",
       nomEtape: ""
-      
     };
     Valider = Valider.bind(this)
     CheckForImage = CheckForImage.bind(this)
@@ -72,9 +71,8 @@ export default class ValideEtape extends Component {
           etapeValide = this.props.route.params.lesEtapes[this.props.route.params.index];
           this.setState({nomEtape : this.props.route.params.lesEtapes[this.props.route.params.index].nomEtape});
         }else{
-          //console.log("Etape depuis la cameras");
           etapeValide = this.props.route.params.etapeValue;
-          this.setState({nomEtape : this.props.route.params.etapeValue.nomEtape});
+          this.setState({nomEtape : this.props.route.params.nomEtape});
         }
       }
     }
@@ -127,8 +125,7 @@ function Valider() {
 }
 
 function PrendreUnePhoto(){
-  etapeValide.nomEtape = nomEtape;
-  props.navigation.push("CaptureScreen",{etapeValide:etapeValide});
+  props.navigation.navigate("CaptureScreen",{etapeValide:etapeValide,nomEtape:nomEtape});
 }
 
 const styles = StyleSheet.create({

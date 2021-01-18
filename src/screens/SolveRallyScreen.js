@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TouchableOpacity,Image,Dimensions } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity,Image,BackHandler,Dimensions } from "react-native";
 import React, { Component,Fragment } from "react";
 import auth from "@react-native-firebase/auth";
 import { RNCamera, FaceDetector } from "react-native-camera";
@@ -16,50 +16,12 @@ import {
 const comparationTreshold = 0.00001;
 
 function cameraStyle(){
-    if(this.state.isAlign){
-        return(
-            {flex: 1,
-            alignItems: "center",
-            borderColor : "rgba(132,236,100,1)",
-            borderWidth : 15,}
-            );
-    }
     return(
         {flex: 1,
         alignItems: "center",
         borderWidth : 15,}
         );
 }
-
-function isInRange(value,comparateValue){
-    comparateValue = comparateValue.toFixed(5);
-    value = value.toFixed(5);
-
-    if(value == comparateValue || value <= Number(comparateValue) + Number(comparationTreshold) && value >= Number(comparateValue) - Number(comparationTreshold) ){
-        return(true);
-    }else{
-        return(false);
-    }
-}
-
-function isAlign(){
-    if(this != undefined && this.state.currentRally != undefined){
-      console.log(this.state.currentRally.getCurrentEtape().latitudeEtape)
-      console.log(this.sensorsCaptures.position.latitude)
-      console.log(isInRange(this.sensorsCaptures.position.latitude,this.state.currentRally.getCurrentEtape().latitudeEtape));
-      console.log(this.state.currentRally.getCurrentEtape().longitudeEtape)
-      console.log(this.sensorsCaptures.position.longitude)
-      console.log(isInRange(this.sensorsCaptures.position.longitude,this.state.currentRally.getCurrentEtape().longitudeEtape));
-        if(isInRange(this.sensorsCaptures.position.latitude,this.state.currentRally.getCurrentEtape().latitudeEtape)){
-            if(isInRange(this.sensorsCaptures.position.longitude,this.state.currentRally.getCurrentEtape().longitudeEtape)){
-               console.log("Bonne Photo");
-               return;
-            }
-        }
-    }
-    console.log("Mauvaise Photo");
-}
-
 function DebugInfo(){
     if(this!= undefined){
         if(this.state.currentRally != undefined && this.sensorsCaptures != undefined){
@@ -90,26 +52,29 @@ export default class SolveRallyScreen extends Component {
     this.etapeLogic.comparationTresholdPos = 0.00003;
     this.state = {
       user: auth().currentUser,
-      isAlign : false,
       currentImage: null,
       warningText:"",
+      canInteract: true,
     };
     cameraStyle = cameraStyle.bind(this);
-    isAlign = isAlign.bind(this);
     DebugInfo = DebugInfo.bind(this);
   }
   componentDidMount() {
     const subscription = accelerometer.subscribe(({ x, y, z, timestamp }) =>
       this.setState({ x: x, y: y, z: z })
     );
-    getData = getData.bind(this);
+    buildEtape = buildEtape.bind(this);
     this._unsubscribe = this.props.navigation.addListener('focus', () => {
       if(this.props.route.params != null){
         this.setState({currentRally : this.props.route.params.currentRally});
         this.setState({currentImage : this.props.route.params.currentRally.state.image.urlImageEtape});
+        this.setState({canInteract: true});
+        this.takePicture = this.takePicture.bind(this);
+
     }
     this.setState({sensorsCaptures:null});
-    console.log("test");
+    //Desactive le retour en arriere
+    BackHandler.addEventListener('hardwareBackPress', function() {return true})
     this.setState({sensorsCaptures:new Sensors()});
     this.sensorsCaptures.randomNumber = Math.random();
     });
@@ -147,7 +112,11 @@ export default class SolveRallyScreen extends Component {
         <DebugInfo />
         <Text style={{opacity: this.state.fadeAnimation},styles.warningText}>{this.state.warningText}</Text>
         <IconButton style = {styles.closeButton} sourceImage={require('../../assets/icons/close.png')} 
-         onPress={() =>  this.props.navigation.navigate("MapScreen",{currentRally : this.state.currentRally})}/>
+         onPress={() =>  {
+           if(this.state.canInteract){
+            this.props.navigation.navigate("MapScreen",{currentRally : this.state.currentRally})
+           }
+           }}/>
         <View
           style={{ flex: 0, flexDirection: "row", justifyContent: "center" }}
         >
@@ -157,7 +126,12 @@ export default class SolveRallyScreen extends Component {
         />
         
           <TouchableOpacity
-            onPress={this.takePicture.bind(this)}
+            onPress={() =>  {
+              if(this.state.canInteract){ 
+                this.takePicture();
+              }
+            }
+            }
             style={styles.capture}
           >
             <Text style={{ fontSize: 14 }}> SNAP </Text>
@@ -169,9 +143,28 @@ export default class SolveRallyScreen extends Component {
 
   takePicture = async () => {
     if (this.camera) {
-      const options = { quality: 0.5, base64: true };
-      const data = await this.camera.takePictureAsync(options);
-      this.sendData(data);
+      //const options = { quality: 0.5, base64: true };
+      //const data = await this.camera.takePictureAsync(options);
+      this.setState({warningText : "Ne pas bouger pendant la photo"});
+      this.setState({canInteract: false});
+      this.resetWarning();
+      this.sensorsCaptures.getCurrentPosition(async function (position) {
+        let etape = buildEtape(position,this.sensorsCaptures)
+        if(this.etapeLogic.compareEtape(etape,this.state.currentRally.getCurrentEtape())){
+          //Reussite du Rally
+          this.state.currentRally.state.etapeActuel++;
+          this.setState({canInteract: true});
+
+          this.props.navigation.navigate("MapScreen",{currentRally:this.state.currentRally})
+        }else{
+          this.setState({canInteract: true});
+          this.setState({warningText : "Mauvaise Photo"});
+          this.resetWarning();
+        }
+      }.bind(this))
+
+
+      //this.sendData(data);
     }
   };
   resetWarning(){
@@ -200,12 +193,10 @@ export default class SolveRallyScreen extends Component {
   };
 }
 
-function getData(data,sensor){
+function buildEtape(position,sensor){
   let etape = new Etape();
-
-  etape.nomImage = data.uri;
-  etape.latitudeEtape = sensor.position.latitude;
-  etape.longitudeEtape = sensor.position.longitude;
+  etape.latitudeEtape = position.coords.latitude;
+  etape.longitudeEtape = position.coords.longitude;
   etape.degreeEtape = sensor.Degree;
   etape.angleXEtape = sensor.AngleX;
   etape.angleYEtape = sensor.AngleY;

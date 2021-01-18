@@ -12,13 +12,20 @@ export default class WelcomeScreen extends Component {
   constructor(props) {
     //constructor to set default state
     super(props);
+    this.interval;
     this.state = {
       user: null,
+      isDone: false,
     };
+    CreateAParcour = CreateAParcour.bind(this);
+    CheckUser = CheckUser.bind(this);
     getUserFromDatabase().then((userData) => {
       this.setState({user:userData});
     });
-    CreateAParcour = CreateAParcour.bind(this);
+    CheckUser();
+  }
+  componentWillUnmount() {
+    clearTimeout( this.interval);
   }
   render() {
     return (
@@ -35,14 +42,31 @@ export default class WelcomeScreen extends Component {
 }
 function CreateAParcour(){
   if(this.state.user != null && this.state.user.isPremium == true){
-    return(<Fragment>
+    return(
+    <Fragment>
       <FormButton title={"Créer parcours"} onPress={() => this.props.navigation.push("CreateRallyScreen",{nouveauxRally : true })}/>
-    </Fragment>)
+    </Fragment>
+    )
   }
-  return(<Fragment>
-  <Text>Vous devez debloquer le prenium</Text>
-  <FormButton style={styles.lockedButton}title={"Créer parcours"} onPress={() => console.log("Pas premium")}/>
+  return(
+  <Fragment>
+    <Text>Vous devez debloquer le premium</Text>
+    <FormButton style={styles.lockedButton}title={"Créer parcours"} onPress={() => console.log("Pas premium")}/>
   </Fragment>)
+}
+function CheckUser(){
+  this.interval = setTimeout(() => {
+    if(this != undefined ){
+        if(this.state.user== null){
+        getUserFromDatabase().then((userData) => {
+          this.setState({user:userData});
+        });
+        CheckUser();
+      }else{
+          clearTimeout(this.interval);
+      }
+    }
+  }, 15000);
 }
 const styles = StyleSheet.create({
   container: {

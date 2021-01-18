@@ -119,7 +119,6 @@ export default class MapScreen extends Component {
     } 
     });
   }
-
   remap() {
     setTimeout(() => {
       if(mapView!= null &&mapView!= undefined){
@@ -230,7 +229,7 @@ function MainMenuButtons(){
       <IconButton
       style={styles.middleMain}
       sourceImage={require("../../assets/icons/Inventory.png")}
-      onPress={() => console.log("Menu")}
+      onPress={() => this.getCurrrentLocation()}
       />
       <IconButton
       style={styles.rightMain}

@@ -68,9 +68,11 @@ export async function getRally(region,zoomValue) {
     await database().ref('Rally/').once('value').then(snapshot => {
         rallys = snapshot.val();
     });
+
     if(rallys != null &&rallys != undefined){
-    rallys = Object.values(Object.values(rallys)[0]);
+    rallys = Object.values(Object.values(rallys));
     rallys.map((rally, index) => {
+        rally = (Object.values(rally)[0])
         let estimateLatMax = region.latitude + distanceMinestZoom;
         let estimateLatMin = region.latitude - distanceMinestZoom;
         let estimateLongMax = region.longitude + distanceMinestZoom;

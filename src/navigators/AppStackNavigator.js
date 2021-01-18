@@ -22,6 +22,8 @@ export function AppStackNavigator() {
       screenOptions={{
         headerShown: false,
         animationEnabled: false,
+        headerLeft: null,
+        gesturesEnabled: false,
       }}
     >
       <AppStack.Screen name="WelcomeScreen" component={WelcomeScreen} />

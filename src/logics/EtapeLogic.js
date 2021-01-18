@@ -1,13 +1,12 @@
 export default class EtapeLogic{
 
     constructor() {
-        this.comparationTresholdPos = 0.00001;
-        this.comparationTresholdGlobal = 10;
+        this.comparationTresholdPos = 0.000015;
+        this.comparationTresholdGlobal = 20;
         this.comparationTresholdDeg = 15;
       }
 
     compareEtape(firstEtape,SecondEtape){
-        console.log(firstEtape);
         if(!this.isInRange(firstEtape.longitudeEtape,SecondEtape.longitudeEtape,this.comparationTresholdPos)){
             console.log("Mauvaise Longitude");            
             console.log(firstEtape.longitudeEtape);
