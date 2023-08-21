@@ -1,0 +1,21 @@
+{
+    "_comment": "Page de connexion",
+    "identifier": "Identification",
+    "courriel": "Courriel",
+    "Mot de passe": "Mot de passe",
+    "Se Connecter": "Connexion",
+    "Créer un compte": "Créer un compte",
+
+    "_comment": "Page d'acceuil'",
+    "Menu Création": "Menu Création",
+    "Jouer": "Jouer",
+    "PremiumBloquer": "Vous devez debloquer le premium",
+    "Déconnexion": "Déconnexion",
+    
+    "_comment": "Page de creation de Rally'",
+    "Retour": "Retour",
+    "Valider": "Validation du rallye",
+    "Description": "Créer les étapes de votre Rally",
+    "PhotoSuivante": "Photo Suivante"
+
+   }

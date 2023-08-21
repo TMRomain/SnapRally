@@ -7,6 +7,7 @@ import { Input } from "../components/Input";
 import { FormButton } from "../components/FormButton";
 import { TextButton } from "../components/TextButton";
 import { Error } from "../components/Error";
+import {IMLocalized, init} from '../logics/IMLocalized';
 import auth from "@react-native-firebase/auth";
 export default class LoginPage extends Component {
   constructor(props) {
@@ -15,13 +16,14 @@ export default class LoginPage extends Component {
     this.state = {
       email: "",
       password: "",
+      error:"",
     };
   }
   LogInUser = async () => {
     let email = this.state.email;
     let password = this.state.password;
 
-    if (email != null && password != null) {
+    if (email != null && password != null && email != "" && password != "" ) {
       auth()
         .signInWithEmailAndPassword(email, password)
         .then(() => {
@@ -29,47 +31,55 @@ export default class LoginPage extends Component {
         })
         .catch((error) => {
           if (error.code === "auth/invalid-email") {
-            console.log("Cette email est invalide");
+            this.Error("Cette email est invalide");
           }
           if (error.code === "auth/user-not-found") {
-            console.log("Utilisateur non trouver");
+            this.Error("Utilisateur non trouver");
           }
           if (error.code === "auth/wrong-password") {
-            console.log("Mauvais mot de passe");
+            this.Error("Mauvais mot de passe");
           }
-
           console.error(error);
         });
+    }else{
+      this.Error("Mot de passe ou email vide");
     }
+  };
+  Error = (a_error) => {
+    this.setState({
+      error: a_error,
+    });
+    console.log(a_error);
   };
 
   render() {
+    init();
     return (
       <View style={styles.container}>
         <Banner />
         <Form>
-          <Heading>S'identifier</Heading>
-          <Error error={""} />
+          <Heading>{IMLocalized('identifier')}</Heading>
+          <Error error={this.state.error} />
           <Input
-            placeholder="Email"
+            placeholder={IMLocalized('courriel')}
             keyboardType={"email-address"}
             value={this.state.email}
             onChangeText={(email) => this.setState({ email })}
           />
           <Input
-            placeholder="Mot de passe"
+            placeholder={IMLocalized('Mot de passe')}
             secureTextEntry
             value={this.state.password}
             onChangeText={(password) => this.setState({ password })}
           />
           <FormButton
-            title={"Se Connecter"}
+            title={IMLocalized('Se Connecter')}
             onPress={() =>
               this.LogInUser("Test", this.handleEmail, this.handlePassword)
             }
           />
           <TextButton
-            title={"Nouvel utilisateur ? Créer votre comptes"}
+            title={IMLocalized('Créer un compte')}
             onPress={() => this.props.navigation.push("Inscription")}
           />
         </Form>

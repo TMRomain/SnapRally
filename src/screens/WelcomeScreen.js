@@ -7,10 +7,15 @@ import auth from "@react-native-firebase/auth";
 import {getUser}from "../api/UserApi";
 import {getEtapes,addEtape} from "../api/EtapeApi";
 import {getUserFromDatabase,logOut} from "../api/UserApi";
+import {IMLocalized, init} from '../logics/IMLocalized';
+
+
+
 
 export default class WelcomeScreen extends Component {
   constructor(props) {
     //constructor to set default state
+    init();
     super(props);
     this.interval;
     this.state = {
@@ -30,11 +35,11 @@ export default class WelcomeScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Banner />
-           <Form>
-              <FormButton title={"Jouer"} onPress={() => this.props.navigation.navigate("MapScreen")} />
+          <Banner/>
+           <Form style={styles.mainButtons}>
+              <FormButton title={IMLocalized('Jouer')} onPress={() => this.props.navigation.navigate("MapScreen")} />
               <CreateAParcour/>
-              <FormButton title={"Se déconnecter "} onPress={() => logOut()} />
+              <FormButton title={IMLocalized('Déconnexion')} onPress={() => logOut()} />
            </Form>
       </View>
     );
@@ -44,14 +49,14 @@ function CreateAParcour(){
   if(this.state.user != null && this.state.user.isPremium == true){
     return(
     <Fragment>
-      <FormButton title={"Créer parcours"} onPress={() => this.props.navigation.push("CreateRallyScreen",{nouveauxRally : true })}/>
+      <FormButton title={IMLocalized('Menu Création')} onPress={() => this.props.navigation.push("CreateRallyScreen",{nouveauxRally : true })}/>
     </Fragment>
     )
   }
   return(
   <Fragment>
-    <Text>Vous devez debloquer le premium</Text>
-    <FormButton style={styles.lockedButton}title={"Créer parcours"} onPress={() => console.log("Pas premium")}/>
+    <Text>{IMLocalized('PremiumBloquer')}</Text>
+    <FormButton style={styles.lockedButton}title={IMLocalized('Menu Création')} onPress={() => console.log("Pas premium")}/>
   </Fragment>)
 }
 function CheckUser(){
@@ -71,8 +76,13 @@ function CheckUser(){
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
   },lockedButton:{
     backgroundColor: "rgba(255,71,71,1)",
   },
+  mainButtons:{
+    // display:"flex",
+    // justifyContent:"center",
+    // alignItems:"center",
+    top: 50,
+  }
 });

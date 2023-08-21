@@ -5,6 +5,7 @@ import { Form } from "../components/Form";
 import { FormButton } from "../components/FormButton";
 import auth from "@react-native-firebase/auth";
 import {IconButton} from "../components/IconButton";
+import {IMLocalized, init} from '../logics/IMLocalized';
 
 let lesEtapes = [];
 
@@ -50,7 +51,7 @@ function AfficherEtape() {
       })}
       <FormButton
             key = {keyToSet+1}
-            title={"+"}
+            title={IMLocalized('PhotoSuivante')}
             onPress={() =>
               this.props.navigation.push("ValideEtape", {
                 lesEtapes: lesEtapes,
@@ -65,6 +66,7 @@ export default class CreateRallyScreen extends Component {
   constructor(props) {
     //constructor to set default state
     super(props);
+    init();
     AfficherEtape = AfficherEtape.bind(this);
     this.state = {
       user: auth().currentUser,
@@ -106,17 +108,22 @@ export default class CreateRallyScreen extends Component {
     return (
       <View style={styles.container}>
         <Banner />
+        
+        <Form style={styles.mainButtons}>
+        <Text>{IMLocalized('Description')}</Text>
         <ScrollView >
-        <Form>
-        <Text>Créer les étapes de votre Rally</Text>
-        <IconButton style = {styles.closeButton} sourceImage={require('../../assets/icons/close.png')} onPress={() =>  this.props.navigation.push("WelcomeScreen")}/>
+
+
           <AfficherEtape />
           <FormButton
-            title={"Valider les étapes"}
+            title={IMLocalized('Valider')}
             {...buttonProps}
           />
-        </Form>
+           <FormButton
+            title={IMLocalized('Retour')} onPress={() =>  this.props.navigation.push("WelcomeScreen")}
+          />
         </ScrollView>
+        </Form>
       </View>
     );
   }
@@ -127,11 +134,7 @@ const styles = StyleSheet.create({
   },
   button:{
     backgroundColor: "rgba(191, 191, 191,1)",
-  },
-  closeButton:{
-    position: "absolute",
-    right : -20,
-    top:-20,
-    borderRadius: 40,
-  },
+  },mainButtons:{
+    top:50,
+  }
 });
